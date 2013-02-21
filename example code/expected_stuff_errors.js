@@ -17,7 +17,7 @@ if (a) {
     a = 2;
 }
 
-var a = function()  {"use strict"; var a = function()    {};                         } ;
+var a = function()  {"use strict"; var a = function()    {}; };
 
 
 // Expected '{a}' at column {b}, not column {c}.
@@ -36,8 +36,7 @@ if (a) {
     }
 }
 
-// The body of a for in should be wrapped in an if statement 
-// to filter unwanted properties from the prototype.
+// The body of a for in should be wrapped in an if statement to filter unwanted properties from the prototype.
 for (b in a) {
     a = b;
 }
