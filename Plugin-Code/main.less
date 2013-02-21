@@ -1,0 +1,129 @@
+.CodeMirror-linenumber.cc-JSLint-error-in-line {
+    color: black;
+}
+
+.cc-JSLint-one-error, .cc-JSLint-several-errors, .cc-JSLint-stopping-error {
+    margin-right: 2pt;
+    padding-left: 2pt;
+    padding-right: 2pt;
+    font-weight: bold;
+    color: white;
+    border-radius: 50%;
+}
+
+.cc-JSLint-several-errors {
+    background-color: rgb(182, 43, 63);
+}
+
+.cc-JSLint-one-error {
+    background-color: rgb(231, 79, 96);
+}
+
+.cc-JSLint-stopping-error {
+    background-color: rgb(115, 40, 48);
+    //padding-right: 4pt;
+    //padding-left: 4pt;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.CodeMirror-lines 
+{
+    .cc-JSLint-error-message {
+        white-space: normal;
+        margin-right: 8em;
+        margin-top: 2pt;
+        width: 100%;
+        font-family: 'SourceSansPro', Helvetica, Arial, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+        box-shadow: inset 0pt 1pt 2pt rgb(137, 99, 96),
+                    inset 0pt -1pt 2pt rgb(137, 99, 96);
+        padding-top: 2pt;
+        padding-bottom: 2pt;
+        background-color: rgb(237, 199, 196);
+        
+        div {
+            margin-top: 2pt;
+            padding-left: 10px;
+        }
+        
+        div:first-child {
+            margin-top: 0pt;
+        }
+        
+        span {
+            padding-left: 1em;
+            padding-right: 1em;
+            background-color: rgb(247, 153, 151);
+            border-radius: 2em;
+            border-top-left-radius: 0em;
+        }
+        
+        span.cc-code {
+            font-family: 'SourceCodePro', "ＭＳ ゴシック", "MS Gothic", monospace;
+            padding-left: 0em;
+            padding-right: 0em;
+        }
+        
+        span.cc-offset {
+            display: inline-block;
+            padding: 0;
+            margin: 0;
+            margin-left: -10px;
+            position: relative;
+            background-color: transparent;
+            border-radius: 0;
+            border: 0;
+        }
+    }
+    
+    .cc-noscroll {
+        overflow: hidden;
+    }
+    
+    .highlightErrorLine {
+        //background-color: rgb(237, 199, 196);
+    }
+    
+    .cc-JSLint-error-stopped-right {
+        border-color: black;
+        border-bottom-style: dotted;
+        border-bottom-width: 1pt;
+    }
+    .cc-JSLint-error-stopped-right:last-child {
+        border-right-style: dashed;
+        border-right-width: 1pt;
+    }
+    
+    .cc-JSLint-error-stopped-left {
+        border-left-color: black;
+        border-left-style: dashed;
+        border-left-width: 1pt;
+    }
+    
+    .cc-JSLint-error-highlight {
+        border-bottom-style: dotted;
+        border-bottom-width: 2pt;
+        border-bottom-color: red;
+    }
+    
+    .cc-JSLint-error-missing-left {
+        border-left-style: dashed;
+        border-left-width: 1pt;
+        border-left-color: red;
+        border-bottom-left-radius: 3pt;
+        border-top-left-radius: 3pt;
+    }
+    
+    .cc-JSLint-error-missing-right {
+        border-right-style: dashed;
+        border-right-width: 1pt;
+        border-right-color: red;
+        border-bottom-right-radius: 3pt;
+        border-top-right-radius: 3pt;
+    }
+}
+
+// make the CodeMirror-gutter wider to accomodate the error marker
+.cm-s-default div.CodeMirror-gutter {
+    min-width: 4.0em;
+}
