@@ -15,6 +15,7 @@ define(function (require, exports, module) {
             ch: jslintError.character - 1 // starts at 1, but we need it to start at 0
         };
         this.evidence = jslintError.evidence;
+        this.message_id = jslintError.message_id;
         this.raw = jslintError.raw;
         this.reason = jslintError.reason;
         this.a = jslintError.a;
@@ -23,9 +24,232 @@ define(function (require, exports, module) {
         this.d = jslintError.d;
         this.type = JSLintError.TypesEnum.DEFAULT;
         this.correctStartPositionAndCalculateEndPosition(codeLines);
+        this.classifyError();
     }
     
     JSLintError.TypesEnum = Object.freeze({ DEFAULT : 0, MISSING : 1, STOPPING : 2});
+    
+    JSLintError.SeverityLevelEnum = Object.freeze({UNCLASSIFIED : 0, SYNTAX_ERROR : 1, BAD_CODE_OR_PRACTICE : 2, WARNING: 3, JUST_STYLE: 4});
+    
+    JSLintError.prototype.classifyError = function () {
+        // First some special cases
+        if ((this.message_id === "expected_a_b") && (this.a === ";")) {
+            // a missing semicolon is not always a syntax error, depending on the browser
+            // but it should be fixed anyway.
+            this.severityLevel = JSLintError.SeverityLevelEnum.SYNTAX_ERROR;
+            return;
+        }
+        
+        if ((this.message_id === "unexpected_a") && (this.a === "(space)")) {
+            // an unexpected space is just a style problem
+            this.severityLevel = JSLintError.SeverityLevelEnum.JUST_STYLE;
+            return;
+        }
+        
+        
+        switch (this.message_id) {
+        // SYNTAX ERROR
+        case "bad_assignment":
+        case "bad_invocation": // in some cases this works, in some it doesn't. ( `"test"()` is wrong. But `(a = function () {})()` works). We classify it as syntax error to be sure 
+        case "expected_a_b": // something is wrong ^^
+        case "expected_a_b_from_c_d": // likely a syntax error, although I couldn't reproduce it completely.
+        case "expected_identifier_a": // JSLint seems to stop after this kind of error, and the only examples I found were actually syntax errors
+        case "expected_identifier_a_reserved": // not sure if syntax error or just really stupid. Even if it compiles, it shouldn't.
+        case "function_statement":
+        case "missing_property":
+        case "name_function":
+        case "nested_comment":
+        case "not_a_label":
+        case "reserved_a": // not sure if syntax error or just really stupid. Even if it compiles, it shouldn't.
+        case "unclosed":
+        case "unclosed_comment":
+        case "unclosed_regexp":
+        case "unescaped_a":
+        case "used_before_a": // not strictly a syntax error, WOULD compile, but really bad style if meant like that, and usually just a typo. We handle it as if it was mistyped.
+            this.severityLevel = JSLintError.SeverityLevelEnum.SYNTAX_ERROR;
+            break;
+                
+        // BAD_CODE_OR_PRATICE
+        case "a_label":
+        case "assign_exception":
+        case "bad_in_a":
+        case "bad_new":
+        case "conditional_assignment":
+        case "confusing_a":
+        case "deleted":
+        case "duplicate_a":
+        case "empty_class":
+        case "evil":
+        case "expected_string_a": // only example I could find: `(typeof b === c)` complains about c not being a string. Is probably bad style but will work.
+        case "for_if": // will compile, but is probably a bad idea
+        case "function_eval":
+        case "function_loop": // although it compiles doing this is often a sign of not understanding closure. Also it creates a new function object with each iteration.
+        case "implied_evil": // eval(), just worse
+        case "isNaN": // comparing to NaN will always give false even (NaN == NaN) is false, so this is most likely a programming error
+        case "label_a_b": // don't use labels on non-loop statements. What are you trying to do?
+        case "missing_a": // only found "missing new", that's likely an oversight and programming error
+        case "missing_a_after_b": // only found "missing break", that's at least bad practice, often an error
+        case "not_a_constructor": // Compiles and doesn't crash, but it likely doesn't do what you expect (e.g. ("test" === new String("test")) is false)
+        case "read_only": // Compiles, doesn't destroy anything, but is still wrong
+        case "statement_block": // Using a block (without if, a loop or similar) indicates that you believe that Javascript has block scoping. That is not the case and probably leads to errors.
+        case "unexpected_a": // Not sure what this is, but it probably shouldn't be here
+        case "unexpected_property_a": // This property probably doesn't exist
+        case "unreachable_a_b": // most likely a programming error
+        case "use_array": // it's bad practice because Array(2,3) is [2,3], Array("2") is ["2"], but Array(2) is an array of length 2 without values.
+        case "use_braces": // bad style
+        case "use_param": // why would you use arguments[i] if you have a name for the parameter?! Trying to confuse people?
+        case "var_a_not": // bad style, although it seems to work
+        case "weird_new": // likely something wrong
+        case "wrap_immediate": // otherwise it looks as if a function is assigned, which is not the case and makes understanding the code a lot harder
+        case "write_is_wrong": // document.write can be a form of eval
+            this.severityLevel = JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRATICE;
+            break;
+                
+        // WARNING
+        case "already_defined":
+        case "and":
+        case "assignment_function_expression":
+        case "bad_wrap":
+        case "constructor_name_a":
+        case "empty_block":
+        case "empty_case":
+        case "function_block": // not a problem in a simple if or similar. But is a problem if two functions with the same name are declared in if and else block.
+        case "function_strict": // may lead to interferences with other files importing this one. Global context and stuff.
+        case "html_handlers":
+        case "infix_in": // sometimes even warranted: http://stackoverflow.com/questions/6824895/jslint-error-unexpected-in-compare-with-undefined-or-use-the-hasownproperty
+        case "insecure_a":
+        case "missing_use_strict": // you probably want to use strict
+        case "move_var": // often leads to errors
+        case "radix": // not a great idea, but often works
+        case "strange_loop": // not a great idea, but often works
+        case "strict": // using this in a "non-method" often leads to errors
+        case "unnecessary_initialize": // indicates programmer doesn't understand what he's doing, but it's not harmful
+        case "weird_assignment":
+        case "weird_condition":
+        case "weird_relation":
+        case "weird_ternary":
+            this.severityLevel = JSLintError.SeverityLevelEnum.WARNING;
+            break;
+        
+        // JUST_STYLE
+        case "combine_var":
+        case "dangling_a":
+        case "expected_a_at_b_c":
+        case "expected_space_a_b":
+        case "leading_decimal_a":
+        case "trailing_decimal_a":
+        case "missing_space_a_b":
+        case "mixed":
+        case "move_invocation":
+        case "slash_equal": // works fine, confusing it with something like a/= 2; might be an issues, but with syntax highlighting that's usually not a problem.
+        case "subscript":
+        case "too_long":
+        case "unexpected_space_a_b":
+        case "unnecessary_use":
+        case "use_object": // seems to be a question of style: http://www.jameswiseman.com/blog/2011/01/19/jslint-messages-use-the-object-literal-notation/
+        case "use_or": // seems to be a matter of style to me. I think b ? b : defaultValue is easier to understand than b || defaultValue.
+        case "wrap_regexp":
+            this.severityLevel = JSLintError.SeverityLevelEnum.JUST_STYLE;
+            break;
+                
+        // UNCLASSIFIED:
+        case "a_not_allowed":   // does not seem to be used in current implementation
+        case "a_not_defined":   // does not seem to be used in current implementation
+        case "a_scope":         // Could not reproduce
+        case "adsafe_a":        // all the adsafe thing are unclassified for now
+        case "adsafe_autocomplete":
+        case "adsafe_bad_id":
+        case "adsafe_div":
+        case "adsafe_fragment":
+        case "adsafe_go":
+        case "adsafe_html":
+        case "adsafe_id":
+        case "adsafe_id_go":
+        case "adsafe_lib":
+        case "adsafe_lib_second":
+        case "adsafe_missing_id":
+        case "adsafe_name_a":
+        case "adsafe_placement":
+        case "adsafe_prefix_a":
+        case "adsafe_script":
+        case "adsafe_source":
+        case "adsafe_subscript_a":
+        case "adsafe_tag":
+        case "attribute_case_a":    // Could not reproduce it
+        case "avoid_a":             // Could not reproduce it
+        case "bad_color_a":         // whatever
+        case "bad_constructor":     // Could not reproduce it
+        case "bad_entity":          // whatever
+        case "bad_html":            // whatever
+        case "bad_id_a":            // whatever
+        case "bad_name_a":          // Could not reproduce it
+        case "bad_number":          // Could not reproduce it
+        case "bad_operand":         // Could not reproduce it
+        case "bad_style":           // something about CSS?
+        case "bad_type":            // something about HTML input fields?
+        case "bad_url_a":           // something about HTML <a href>?
+        case "control_a":           // Could not reproduce it
+        case "confusing_regexp":    // Could not reproduce it
+        case "css":                 // whatever
+        case "dangerous_comment":   // not sure what that means
+        case "es5":                 // not handled yet
+        case "expected_a":          // Not sure, what kind of things would appear here. Likely different levels?
+        case "expected_at_a":       // No clue what that is
+        case "expected_attribute_a":// HTML stuff?
+        case "expected_attribute_value_a":// HTML stuff?
+        case "expected_class_a":    // HTML stuff?
+        case "expected_fraction_a": // CSS stuff?
+        case "expected_id_a":       // CSS stuff?
+        case "expected_linear_a":   // whatever
+        case "expected_lang_a":     // HTML/CSS stuff?
+        case "expected_media_a":    // CSS stuff?
+        case "expected_name_a":     // CSS stuff?
+        case "expected_nonstandard_style_attribute": // CSS stuff?
+        case "expected_number_a":   // CSS stuff?
+        case "expected_operator_a": // CSS stuff?
+        case "expected_percent_a":  // CSS stuff?
+        case "expected_positive_a": // CSS stuff?
+        case "expected_pseudo_a":   // CSS stuff?
+        case "expected_selector_a": // CSS stuff?
+        case "expected_small_a":    // CSS stuff?
+        case "expected_style_attribute": // CSS stuff?
+        case "expected_style_pattern": // CSS stuff?
+        case "expected_tagname_a":  // CSS stuff?
+        case "expected_type_a":     // not sure what this is about
+        case "html_confusion_a":    // only in mixed HTML/JS files?
+        case "identifier_function": // Could not reproduce it
+        case "lang":                // HTML stuff?
+        case "missing_option":      // does not seem to be used in current implementation
+        case "missing_url":         // HTML/CSS stuff?
+        case "not":                 // Could not reproduce it
+        case "not_a_defined":       // Could not reproduce it
+        case "not_a_function":      // Could not reproduce it
+        case "not_a_scope":         // Could not reproduce it
+        case "not_greater":         // Could not reproduce it
+        case "parameter_a_get_b":   // ES5 stuff
+        case "parameter_set_a":     // ES5 stuff
+        case "redefinition_a":      // does not seem to be used in current implementation
+        case "scanned_a_b":         // Think this doesn't appear in reality. Just as part of an error message.
+        case "stopping":            // Think this doesn't appear in reality. Just as part of an error message.
+        case "too_many":            // Think this doesn't appear in reality. Just as part of an error message.
+        case "tag_a_in_b":          // HTML stuff?
+        case "type":                // HTML stuff?
+        case "unexpected_char_a_b": // Could not reproduce it
+        case "unexpected_comment":  // No clue
+        case "unrecognized_style_attribute_a": // HTML/CSS stuff?
+        case "unrecognized_tag_a":  // HTML/ stuff?
+        case "unsafe":              // Could not reproduce it
+        case "url":                 // Could not reproduce it
+        case "use_charAt":          // Could not reproduce it
+        case "weird_program":       // Could not reproduce it
+            this.severityLevel = JSLintError.SeverityLevelEnum.UNCLASSIFIED;
+            break;
+                
+        default:
+            console.log("Unknown error type: '" + this.message_id + "' with message: " + this.raw);
+            this.severityLevel = JSLintError.SeverityLevelEnum.UNCLASSIFIED;
+        }
+    };
     
     // function that is used for calculating the highlighting range for an erroneuos string, if the calculation is straightforward
     JSLintError.prototype.calculateSimpleStartAndEndPosition = function (stringToSearchForParam) {
