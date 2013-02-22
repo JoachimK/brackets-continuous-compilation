@@ -41,11 +41,13 @@ try {
 x && a.push(x);
 a + b;
 
+//Expected a conditional expression and instead saw an assignment.
 if (c = 1) {
     c = a = 2;
     a + b;
 }
 
+// Expected '===' and instead saw '=='
 if (c == 1) {
     c = 2;
 }
@@ -92,3 +94,12 @@ a = {foo : "", foo : foo};
 var b;
 
 b = {foo: {foo: a}, foo: {bar: "", foo: bla}};
+
+switch (a) {
+case "bla":
+    b = a;
+    break;
+case "bla":
+    c = a;
+    break;
+}

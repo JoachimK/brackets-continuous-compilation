@@ -11,9 +11,7 @@ if (a < b) {
 
 a = b;
     }
-{
-c:
-a};
+
 if (a < b) {
   { a = b; }
 }
@@ -26,12 +24,16 @@ var a = b;
 // Strict violation.
 function foo() {
     "use strict";
-    a = this;
+    a = this.b;
+    this.b = 2;
 }
 
 // ['{a}'] is better written in dot notation.
 a = b["test"];
 a['test'] = b;
+a[""] = b; // that's fine
+a["hallo welt"] = b; // as is this
+a[b] = b; // or this
 
 
 // Line too long.
@@ -40,4 +42,4 @@ a['test'] = b;
 
 
 // A regular expression literal can be confused with '/='.
-a = /=abc/;
+a = /= abc/;

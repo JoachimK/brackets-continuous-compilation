@@ -31,6 +31,9 @@ for (a = 0; a < 1; a += 1) {
 var a = function () { while (a < b) {var test = function () {}; } };
 
 
+// Do not wrap function literals in parens unless they are to be immediately invoked.
+a = (function () {});
+
 
 // Function statements are not invocable. Wrap the whole function invocation in parens.
 function bar() {

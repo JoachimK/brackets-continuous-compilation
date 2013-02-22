@@ -1,6 +1,7 @@
 // Expected '{a}' and instead saw '{b}'.
 var a = 2
 var b, B = 2;
+a = 2 b = 3
 
 if (a == b) {
     a = 2;
@@ -8,6 +9,8 @@ if (a == b) {
 
 // Expected an identifier and instead saw '{a}' (a reserved word).
 var undefined = 2;
+var typeof = 2;
+a = {true : 3};
 
 
 // Expected exactly one space between '{a}' and '{b}'.
@@ -72,5 +75,15 @@ for (b in a) { a = b; }
 a = /[]/;
 a = /[abc][]*/;
 
+
+// Expected a string and instead saw {a}.
+a = (typeof a === b);
+
 // Expected an identifier and instead saw '{a}'.
+try {
+    // stuff
+} catch ("") {
+    
+}
+
 a.= 2;

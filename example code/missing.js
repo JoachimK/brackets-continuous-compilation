@@ -1,6 +1,7 @@
 // Missing '{a}'.
 var ConstructorLike, a, b;
 a = ConstructorLike();
+a = String(b); // not a problem
 
 // Missing '{a}' after '{b}'.
 switch (a) {
@@ -14,6 +15,7 @@ default:
     break;
 }
 
+// Expected '{a}' and instead saw '{b}'.
 function foo() { return 2}
 
 // Missing space between '{a}' and '{b}'.

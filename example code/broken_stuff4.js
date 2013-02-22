@@ -10,12 +10,12 @@ var a, b;
 
 // Mixed spaces and tabs
 
-//  	Some stuff
+//      Some stuff
 
 // '{a}' is not a label.
 for (a = 0; a < 0; a += 1) {
     if (a < b) {
-        break a;
+        break d;
     }
 }
 
@@ -26,4 +26,4 @@ a = parseInt(b());
 document = a;
 
 // Reserved name '{a}'.
-var __iterator__ = 2;
+a.__iterator__ = 2;

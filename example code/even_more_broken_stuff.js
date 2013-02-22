@@ -105,6 +105,9 @@ a = function () { a = b; }(
     b
 );
 
+// Move the invocation into the parens that contain the function.
+a = (function () {})();
+
 // Wrap the /regexp/ literal in parens to disambiguate the slash operator.
 function bar() {
     return / *[\s,\w]+(a|b)/.test(b);
