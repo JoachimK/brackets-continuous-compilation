@@ -1,8 +1,8 @@
-/*jslint devel: true, regexp: true, nomen: true, indent: 4 */
+/*jslint devel: true, regexp: true, nomen: true, indent: 4, todo: true */
 /*global define, $, JSLINT */
 
 define(function (require, exports, module) {
-	"use strict";
+    "use strict";
     
     function _regExpEscape(str) {
         var specials = new RegExp("[.*+?|()\\[\\]{}\\\\]", "g"); // .*+?|()[]{}\
