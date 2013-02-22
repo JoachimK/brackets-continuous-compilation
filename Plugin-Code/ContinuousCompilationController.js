@@ -2,7 +2,7 @@
 /*global define, $, JSLINT, PathUtils */
 
 define(function (require, exports, module) {
-	"use strict";
+    "use strict";
     
     var JSLintError = require("JSLintError"),
         JSLINT      = require("JSLint/jslint");
