@@ -28,6 +28,7 @@ a = ( a + b );
 if (a && (b && (a)) ) {
     a = b;
 }
+a = ( "hallo" + "welt" );
 
 // It is not necessary to initialize '{a}' to 'undefined'.
 var o = undefined, foo = undefined,
