@@ -300,8 +300,8 @@ define(function (require, exports, module) {
             return;
         }
         
-        if (this.raw === "Expected to see a statement and instead saw a block.") {
-            // Sine Javascript has no block-scoping, introducing blocks that do not belong to loops, if-statements or functions does not make sense
+        if (this.message_id === "statement_block") { // "Expected to see a statement and instead saw a block."
+            // Since Javascript has no block-scoping, introducing blocks that do not belong to loops, if-statements or functions does not make sense
             // But in this case, the error points to the first token after the opening {. We want to highlight the opening { so we have to find it first.
             stringToTest = this.evidence.substring(0, this.startPosition.ch); // only take the line UP TO the character the error points to, because the bracket has to be before that.
             stringToSearchFor = "{";
@@ -323,35 +323,36 @@ define(function (require, exports, module) {
         }
         // else
         
-        if ((this.b === undefined) && (this.raw.indexOf("Expected") === 0)) {
+        if ((this.b === undefined) && (this.message_id.indexOf("expected") === 0)) {
             // the default highlight will work fine
             this.calculateSimpleStartAndEndPosition();
             // this is the case for the following erro messages
-            //  Expected an at-rule, and instead saw @{a}.
-            //  Expected an attribute, and instead saw [{a}].
-            //  Expected an attribute value and instead saw '{a}'.
-            //  Expected a class, and instead saw .{a}.
-            //  Expected a number between 0 and 1 and instead saw '{a}'
-            //  Expected an id, and instead saw #{a}.
-            //  Expected an identifier and instead saw '{a}'.
-            //  Expected an identifier and instead saw '{a}' (a reserved word).
-            //  Expected a linear unit and instead saw '{a}'.
-            //  Expected a lang code, and instead saw :{a}.
-            //  Expected a CSS media type, and instead saw '{a}'.
-            //  Expected a name and instead saw '{a}'.
-            //  Expected a non-standard style attribute and instead saw '{a}'.
-            //  Expected a number and instead saw '{a}'.
-            //  Expected an operator and instead saw '{a}'.
-            //  Expected a percentage and instead saw '{a}'
-            //  Expected a positive number and instead saw '{a}'
-            //  Expected a pseudo, and instead saw :{a}.
-            //  Expected a CSS selector, and instead saw {a}.
-            //  Expected a small positive integer and instead saw '{a}'
-            //  Expected a string and instead saw {a}.
-            //  Excepted a style attribute, and instead saw '{a}'.
-            //  Expected a style pattern, and instead saw '{a}'.
-            //  Expected a tagName, and instead saw {a}.
-            //  Expected a type, and instead saw {a}.
+            //  expected_a: Expected '{a}'.
+            //  expected_at_a: Expected an at-rule, and instead saw @{a}.
+            //  expected_attribute_a: Expected an attribute, and instead saw [{a}].
+            //  expected_attribute_value_a: Expected an attribute value and instead saw '{a}'.
+            //  expected_class_a: Expected a class, and instead saw .{a}.
+            //  expected_fraction_a: Expected a number between 0 and 1 and instead saw '{a}'
+            //  expected_id_a: Expected an id, and instead saw #{a}.
+            //  expected_identifier_a: Expected an identifier and instead saw '{a}'.
+            //  expected_identifier_a_reserved: Expected an identifier and instead saw '{a}' (a reserved word).
+            //  expected_linear_a: Expected a linear unit and instead saw '{a}'.
+            //  expected_lang_a: Expected a lang code, and instead saw :{a}.
+            //  expected_media_a: Expected a CSS media type, and instead saw '{a}'.
+            //  expected_name_a: Expected a name and instead saw '{a}'.
+            //  expected_nonstandard_style_attribute: Expected a non-standard style attribute and instead saw '{a}'.
+            //  expected_number_a: Expected a number and instead saw '{a}'.
+            //  expected_operator_a: Expected an operator and instead saw '{a}'.
+            //  expected_percent_a: Expected a percentage and instead saw '{a}'
+            //  expected_positive_a: Expected a positive number and instead saw '{a}'
+            //  expected_pseudo_a: Expected a pseudo, and instead saw :{a}.
+            //  expected_selector_a: Expected a CSS selector, and instead saw {a}.
+            //  expected_small_a: Expected a small positive integer and instead saw '{a}'
+            //  expected_string_a: Expected a string and instead saw {a}.
+            //  expected_style_attribute: Excepted a style attribute, and instead saw '{a}'.
+            //  expected_style_pattern: Expected a style pattern, and instead saw '{a}'.
+            //  expected_tagname_a: Expected a tagName, and instead saw {a}.
+            //  expected_type_a: Expected a type, and instead saw {a}.
             
             // some special handling
             if ((this.raw === "Expected '{a}'.")
@@ -366,7 +367,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Unexpected '{a}'.") {
+        if (this.message_id === "unexpected_a") { // "Unexpected '{a}'."
             if (this.a === "(space)") {
                 stringToTest = this.evidence.substr(this.startPosition.ch);
                 // find the infringing space
@@ -380,9 +381,10 @@ define(function (require, exports, module) {
         }
         // else
         
-        if ((this.raw === "Missing space between '{a}' and '{b}'.")
-                || (this.raw === "Expected exactly one space between '{a}' and '{b}'.")
-                || (this.raw === "Unexpected space between '{a}' and '{b}'.")) { // we handle those three together since they overlap
+        if ((this.message_id === "missing_space_a_b") // "Missing space between '{a}' and '{b}'."
+                || (this.message_id === "expected_space_a_b") // "Expected exactly one space between '{a}' and '{b}'.")
+                || (this.message_id === "unexpected_space_a_b")) { // "Unexpected space between '{a}' and '{b}'.")) 
+            // we handle those three together since they overlap
             stringToTest = this.evidence; // use the complete line, since we don't know how long the {a} is and the character index points to the point after {a}
             stringA = String(this.a);
             stringB = String(this.b);
@@ -392,9 +394,9 @@ define(function (require, exports, module) {
                 subIndexOfStringToSearchFor;
             /*jslint vars: false */
             
-            if (this.raw === "Missing space between '{a}' and '{b}'.") {
+            if (this.message_id === "missing_space_a_b") {
                 missingSpace = true;
-            } else if (this.raw === "Expected exactly one space between '{a}' and '{b}'.") {
+            } else if (this.message_id === "expected_space_a_b") {
                 // In this case, we don't know whether a space is missing or there are too many spaces. Try to find that out.
                 // If there is a space missing we should find this.a and this.b next to each other in this line around the given position
                 stringToSearchFor = stringA + stringB;
@@ -433,7 +435,7 @@ define(function (require, exports, module) {
                     /*jslint vars: true */
                     var numberOfSpacesToKeep = 0;
                     /*jslint vars: false */
-                    if (this.raw === "Expected exactly one space between '{a}' and '{b}'.") {
+                    if (this.message_id === "expected_space_a_b") {
                         numberOfSpacesToKeep = 1;
                     }
                     this.startPosition.ch = match.index + stringA.length + numberOfSpacesToKeep; // + this.a.length is the part before the spaces, then we add the number of spaces to keep.
@@ -446,7 +448,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Strange loop.") {
+        if (this.message_id === "strange_loop") { // "Strange loop."
             // use the complete line, since the "character" pointer usually points to the semicolon at the end of the line
             // but we want to capture the whole "break;" statement if that is the infringement
             stringToTest = this.evidence;
@@ -467,7 +469,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Expected an assignment or function call and instead saw an expression.") {
+        if (this.message_id === "assignment_function_expression") { // "Expected an assignment or function call and instead saw an expression."
             // These are examples such as
             // a;
             // a + b;
@@ -482,7 +484,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Do not use 'new' for side effects.") {
+        if (this.message_id === "bad_new") { // "Do not use 'new' for side effects."
             // This error occurs when an object created with "new" is not stored in a variable or passed as a parameter, but seemingly thrown away.
             // Such a use indictaes the reliance on side effects of new.
             // The default highlight would highlight the semicolon at the end of the line, but it makes more sense to highlight the new itself.
@@ -494,7 +496,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Unexpected dangling '_' in '{a}'.") {
+        if (this.message_id === "dangling_a") { // "Unexpected dangling '_' in '{a}'."
             // The default highlight underlines the complete variable. But it would be better to just underline the underscore.
             stringToTest = this.evidence.substr(this.startPosition.ch);
             
@@ -505,7 +507,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Only properties should be deleted.") {
+        if (this.message_id === "deleted") { // "Only properties should be deleted."
             // In this case the character position in the error points to the next character AFTER the erroneous statement, e.g.
             stringToTest = this.evidence;
             indexOfStringToSearchFor = stringToTest.indexOf("delete");
@@ -516,7 +518,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Duplicate '{a}'.") {
+        if (this.message_id === "duplicate_a") { // "Duplicate '{a}'."
             // A "duplicate" error occurs in a case such as this: var a = {foo: "bar", foo: 2};
             // The problem here is, that the character position will in that case point to the closing bracket or whatever other character comes after the assignment of the second foo.
             // Even worse: In this case:
@@ -551,7 +553,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Empty block.") {
+        if (this.message_id === "empty_block") { // "Empty block."
             // This error occurs. when a block, e.g. an if-statement or for-loop body, is empty or just contains comments
             // The problem is, that the character index points to the next non-whitespace character after the closing bracket of the empty block.
             // Also, the evidence given in the error object points to the wrong line and the string saved in this.a is simply the next token after the closin bracket of the empty block
@@ -643,7 +645,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Empty case.") {
+        if (this.message_id === "empty_case") { // "Empty case."
             // This error occurs. when a case in a switch statement is empty, i.e. does not contain any statements
             // Similar to the "Empty block" error the problem is, that the character index points to the next non-whitespace character after the 'case something:' 
             // Also, the evidence given in the error object points to the wrong line and the string saved in this.a is simply the next token after the closin bracket of the empty block
@@ -683,7 +685,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Empty class.") {
+        if (this.message_id === "empty_class") { // "Empty class."
             // Empty class hints at an empty character class in a regular expression, e.g. /[]/ or /abc[]*/
             // However, the error points to the character BEFORE the empty class (before the [) and this.a is undefined, so there is nothing to search for
             // We fix that now:
@@ -698,7 +700,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Expected '{a}' and instead saw '{b}'.") {
+        if (this.message_id === "expected_a_b") { // "Expected '{a}' and instead saw '{b}'.") {
             if (this.a === ";") {
                 // the semicolon is a special case, because it is usally missing at the end of the line, and the token reported found instead is in the next line
                 // So, this is a kind of missing. Add an insertion marker at the position reported(which is the the position where the semicolon should be)
@@ -713,7 +715,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Expected '{a}' at column {b}, not column {c}.") {
+        if (this.message_id === "expected_a_at_b_c") { // "Expected '{a}' at column {b}, not column {c}."
             // in this case we simply have to check which of the colum values is bigger and use them to highlight the correct characters
             if (this.b > this.c) {
                 this.startPosition.ch = this.c - 1; // - 1 because the colums start at 1
@@ -728,7 +730,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "The body of a for in should be wrapped in an if statement to filter unwanted properties from the prototype.") {
+        if (this.message_id === "for_if") { // "The body of a for in should be wrapped in an if statement to filter unwanted properties from the prototype."
             // In this case the error points to the line of the for. However we would like to highlight the body of the for-loop
             // We just test whether this line contains an opening and a closing bracket, if so we assume that's the body and highlight it.
             // otherwise, we just highlight the line with the closing bracket, if it contains anything, or the line after the closing bracket
@@ -780,10 +782,9 @@ define(function (require, exports, module) {
                         this.startPosition = originalStartingPosition;
                         this.calculateSimpleStartAndEndPosition();
                         return;
-                    } else {
-                        this.startPosition.ch = 0;
-                        this.endPosition = {line: this.startPosition.line, ch : stringToTest.length};
-                    }
+                    } // else
+                    this.startPosition.ch = 0;
+                    this.endPosition = {line: this.startPosition.line, ch : stringToTest.length};
                 } else {
                     // there is code on the current line, simply highlight everything after the opening {
                     if (!changedLines) {
@@ -800,7 +801,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "The Function constructor is eval.") {
+        if (this.message_id === "function_eval") { // "The Function constructor is eval."
             // Function should not be called as a constructor. But the error points to the opening bracket of the constructor call.
             // Set it back correctly and ask it to highlight "Function" itself.
             this.startPosition.ch = 0;
@@ -809,7 +810,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Don't make functions within a loop.") {
+        if (this.message_id === "function_loop") { // "Don't make functions within a loop."
             // This is another case where the error points to the next token AFTER the closing bracket of the body of the loop.
             // In this case we want to underline the corresponding "function" keyword, to indicate that there should be no function definition at that point
             // Sadly it's very difficult to find the correct function keyword to highlight. 
@@ -839,7 +840,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Label '{a}' on '{b}' statement.") {
+        if (this.message_id === "label_a_b") { // "Label '{a}' on '{b}' statement.") {
             // The problem here is a label on a non-loop statement, which shouldn't be used. 
             // The error points to the statement line, not the label. But the problem is usually the addition of the label, not the statement itself.
             // therefore, the label should be highlighted. We search backwards for the label, to highlight it.
@@ -862,10 +863,10 @@ define(function (require, exports, module) {
         }
         // else
         
-        if ((this.raw === "A leading decimal point can be confused with a dot: '.{a}'.")
-                || (this.raw === "A trailing decimal point can be confused with a dot: '.{a}'.")) {
+        if ((this.message_id === "leading_decimal_a") // "A leading decimal point can be confused with a dot: '.{a}'."
+                || (this.message_id === "trailing_decimal_a")) { // "A trailing decimal point can be confused with a dot: '.{a}'."
             // The error also points to the characters AFTER the decimal point, it would be better to highlight the decimal point itself
-            if (this.raw === "A trailing decimal point can be confused with a dot: '.{a}'.") {
+            if (this.message_id === "trailing_decimal_a") {
                 // In this case it not only points to the characters after the decimal point as well, it ONLY points to those, not to the decimal point. Fix that:
                 this.startPosition.ch -= 1;
                 this.calculateSimpleStartAndEndPosition(".");
@@ -879,10 +880,10 @@ define(function (require, exports, module) {
         }
         // else
         
-        if ((this.raw === "Missing '{a}'.")
-                || (this.raw === "Missing property name.")
-                || (this.raw === "Missing 'use strict' statement.")
-                || (this.raw === "Missing name in function statement.")) {
+        if ((this.message_id === "missing_a") // "Missing '{a}'."
+                || (this.message_id === "missing_property") // "Missing property name."
+                || (this.message_id === "missing_use_strict") // "Missing 'use strict' statement."
+                || (this.message_id === "name_function")) { // "Missing name in function statement."
             // The error points to the character where the missing string should be inserted.
             // we simply display an insertion marker at that position
             this.type = JSLintError.TypesEnum.MISSING;
@@ -891,7 +892,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Missing '{a}' after '{b}'.") {
+        if (this.message_id === "missing_a_after_b") { // "Missing '{a}' after '{b}'."
             // The only case for which I found that was "Missing 'break' after 'case'."
             // We will handle that and use the default highlight otherwise
             if ((this.a === "break") && (this.b === "case")) {
@@ -912,7 +913,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "A regular expression literal can be confused with '/='.") {
+        if (this.message_id === "slash_equal") { // "A regular expression literal can be confused with '/='."
             // The error points to the character AFTER the "/=", so we simply highlight the two characters before that
             this.startPosition.ch -= 2;
             this.endPosition = originalStartingPosition;
@@ -920,7 +921,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Line too long.") {
+        if (this.message_id === "too_long") { // "Line too long."
             // Error points to last character in the line. Just highlight the complete line
             this.startPosition.ch = 0;
             this.endPosition = {line: this.startPosition.line, ch : this.evidence.length};
@@ -928,9 +929,9 @@ define(function (require, exports, module) {
         }
         // else
         
-        if ((this.raw === "Unclosed string.")
-                || (this.raw === "Unclosed comment.")
-                || (this.raw === "Unclosed regular expression.")) {
+        if ((this.message_id === "unclosed") // "Unclosed string."
+                || (this.message_id === "unclosed_comment") // "Unclosed comment."
+                || (this.message_id === "unclosed_regexp")) { // "Unclosed regular expression."
             // Just highlight the rest of the line, after the unclosed string started
             this.endPosition = {line: this.startPosition.line, ch : this.evidence.length};
             
@@ -941,7 +942,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "It is not necessary to initialize '{a}' to 'undefined'.") {
+        if (this.message_id === "unnecessary_initialize") { // "It is not necessary to initialize '{a}' to 'undefined'."
             // Error points to the "=" sign of the initialization, this.a contains the variable name
             // Try to find the complete initialization: variableName = undefined;
             stringToTest = this.evidence;
@@ -963,7 +964,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Use the array literal notation [].") {
+        if (this.message_id === "use_array") { // "Use the array literal notation []."
             // Error points to the opening bracket of "Array("
             // Kinda okay, but it would be better to highlight the "Array" part as well
             stringToTest = this.evidence;
@@ -974,7 +975,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Spaces are hard to count. Use {{a}}.") {
+        if (this.message_id === "use_braces") { // "Spaces are hard to count. Use {{a}}."
             // Error points to the last space in the group. Find the first one to highlight all of them
             stringToTest = this.evidence;
             while ((this.startPosition.ch >= 0) && (stringToTest.charAt(this.startPosition.ch) === " ")) {
@@ -988,7 +989,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "Wrap an immediate function invocation in parentheses to assist the reader in understanding that the expression is the result of a function, and not the function itself.") {
+        if (this.message_id === "wrap_immediate") { // "Wrap an immediate function invocation in parentheses to assist the reader in understanding that the expression is the result of a function, and not the function itself.") {
             // Error points to the first argument of the invocation or the closing ) if there are no arguments.
             // instead it should point to the opening (
             stringToTest = this.evidence.substring(0, this.startPosition.ch);
@@ -1005,7 +1006,7 @@ define(function (require, exports, module) {
         }
         // else
         
-        if (this.raw === "document.write can be a form of eval.") {
+        if (this.message_id === "write_is_wrong") {
             // error points just to "document", would be nice to highlight "document.write"
             stringToTest = this.evidence.substr(this.startPosition.ch);
             stringToSearchFor = "document.write";
@@ -1023,51 +1024,53 @@ define(function (require, exports, module) {
         // else
         
         // for the following errors I know that the default highlighting works correctly
-        if ((this.raw === "'{a}' was used before it was defined.")
-                || (this.raw === "'{a}' is a statement label.")
-                || (this.raw === "'{a}' is already defined.")
-                || (this.raw === "The '&&' subexpression should be wrapped in parens.")
-                || (this.raw === "Do not assign to the exception parameter.")
-                || (this.raw === "Avoid '{a}'.")
-                || (this.raw === "Bad assignment.")
-                || (this.raw === "Bad for in variable '{a}'.")
-                || (this.raw === "Bad invocation.") // I don't like the default highlight, but it's too complicated to make it better
-                || (this.raw === "Strict violation.")
-                || (this.raw === "Combine this with the previous 'var' statement.")
-                || (this.raw === "Expected a conditional expression and instead saw an assignment.")
-                || (this.raw === "Confusing use of '{a}'.")
-                || (this.raw === "A constructor name '{a}' should start with an uppercase letter.")
-                || (this.raw === "eval is evil.")
-                || (this.raw === "Function statements should not be placed in blocks. Use a function expression or move the statement to the top of the outer function.")
-                || (this.raw === "Function statements are not invocable. Wrap the whole function invocation in parens.")
-                || (this.raw === "Use the function form of 'use strict'.")
-                || (this.raw === "Implied eval is evil. Pass a function instead of a string.")
-                || (this.raw === "Unexpected 'in'. Compare with undefined, or use the hasOwnProperty method instead.")
-                || (this.raw === "Insecure '{a}'.")
-                || (this.raw === "Use the isNaN function to compare with NaN.")
-                || (this.raw === "Move the invocation into the parens that contain the function.")
-                || (this.raw === "Move 'var' declarations to the top of the function.")
-                || (this.raw === "Nested comment.")
-                || (this.raw === "Do not use {a} as a constructor.")
-                || (this.raw === "Mixed spaces and tabs.")
-                || (this.raw === "'{a}' is not a label.")
-                || (this.raw === "Missing radix parameter.") // too difficult, to make the highlight better
-                || (this.raw === "Read only.")
-                || (this.raw === "Reserved name '{a}'.")
-                || (this.raw === "['{a}'] is better written in dot notation.")
-                || (this.raw === "Unescaped '{a}'.")
-                || (this.raw === "Unexpected /*property*/ '{a}'.")
-                || (this.raw === "Unnecessary 'use strict'.")
-                || (this.raw === "Unreachable '{a}' after '{b}'.") // good enough
-                || (this.raw === "Use the object literal notation {}.")
-                || (this.raw === "Use the || operator.")
-                || (this.raw === "Variable {a} was not declared correctly.")
-                || (this.raw === "Weird assignment.")
-                || (this.raw === "Weird condition.")
-                || (this.raw === "Weird relation.")
-                || (this.raw === "Weird construction. Delete 'new'.")
-                || (this.raw === "Weird ternary.")
-                || (this.raw === "Wrap the /regexp/ literal in parens to disambiguate the slash operator.")
+        if ((this.message_id === "used_before_a") // "'{a}' was used before it was defined."
+                || (this.message_id === "a_label") // "'{a}' is a statement label."
+                || (this.message_id === "already_defined") // "'{a}' is already defined."
+                || (this.message_id === "and") // "The '&&' subexpression should be wrapped in parens."
+                || (this.message_id === "assign_exception") // "Do not assign to the exception parameter."
+                || (this.message_id === "avoid_a") // "Avoid '{a}'."
+                || (this.message_id === "bad_assignment") // "Bad assignment."
+                || (this.message_id === "bad_in_a") // "Bad for in variable '{a}'."
+                || (this.message_id === "bad_invocation") // "Bad invocation." // I don't like the default highlight, but it's too complicated to make it better
+                || (this.message_id === "bad_wrap") // "Do not wrap function literals in parens unless they are to be immediately invoked." // I don't like the default highlight, but it's too complicated to make it better
+                || (this.message_id === "strict") // "Strict violation."
+                || (this.message_id === "combine_var") // "Combine this with the previous 'var' statement."
+                || (this.message_id === "conditional_assignment") // "Expected a conditional expression and instead saw an assignment."
+                || (this.message_id === "confusing_a") // "Confusing use of '{a}'."
+                || (this.message_id === "constructor_name_a") // "A constructor name '{a}' should start with an uppercase letter."
+                || (this.message_id === "evil") // "eval is evil."
+                || (this.message_id === "function_block") // "Function statements should not be placed in blocks. Use a function expression or move the statement to the top of the outer function."
+                || (this.message_id === "function_statement") // "Function statements are not invocable. Wrap the whole function invocation in parens."
+                || (this.message_id === "function_strict") // "Use the function form of 'use strict'."
+                || (this.message_id === "implied_evil") // "Implied eval is evil. Pass a function instead of a string."
+                || (this.message_id === "infix_in") // "Unexpected 'in'. Compare with undefined, or use the hasOwnProperty method instead."
+                || (this.message_id === "insecure_a") // "Insecure '{a}'."
+                || (this.message_id === "isNaN") // "Use the isNaN function to compare with NaN."
+                || (this.message_id === "move_invocation") // "Move the invocation into the parens that contain the function."
+                || (this.message_id === "move_var") // "Move 'var' declarations to the top of the function."
+                || (this.message_id === "nested_comment") // "Nested comment."
+                || (this.message_id === "not_a_constructor") // "Do not use {a} as a constructor."
+                || (this.message_id === "mixed") // "Mixed spaces and tabs."
+                || (this.message_id === "not_a_label") // "'{a}' is not a label.")
+                || (this.message_id === "radix") // "Missing radix parameter." // too difficult, to make the highlight better
+                || (this.message_id === "read_only") // "Read only."
+                || (this.message_id === "reserved_a") // "Reserved name '{a}'."
+                || (this.message_id === "subscript") // "['{a}'] is better written in dot notation."
+                || (this.message_id === "unescaped_a") // "Unescaped '{a}'."
+                || (this.message_id === "unexpected_property_a") // "Unexpected /*property*/ '{a}'."
+                || (this.message_id === "unnecessary_use") // "Unnecessary 'use strict'."
+                || (this.message_id === "unreachable_a_b") // "Unreachable '{a}' after '{b}'." // good enough
+                || (this.message_id === "use_object") // Use the object literal notation {}."
+                || (this.message_id === "use_or") // "Use the || operator."
+                || (this.message_id === "var_a_not") // "Variable {a} was not declared correctly."
+                || (this.message_id === "weird_assignment") // "Weird assignment."
+                || (this.message_id === "weird_condition") // "Weird condition."
+                || (this.message_id === "weird_relation") // "Weird relation."
+                || (this.message_id === "weird_new") // "Weird construction. Delete 'new'."
+                || (this.message_id === "weird_ternary") // "Weird ternary."
+                || (this.message_id === "wrap_regexp") // "Wrap the /regexp/ literal in parens to disambiguate the slash operator.")
+                || (this.message_id === "use_param") // Use a named parameter.
                 ) {
             this.calculateSimpleStartAndEndPosition();
             return;
@@ -1075,7 +1078,7 @@ define(function (require, exports, module) {
         // else
         
         // adsafe
-        if (this.raw.search(/adsafe/i) === 0) {
+        if (this.message_id.indexOf("adsafe") === 0) {
             // don't know what to do about adsafe errors, just try the simple highlight
             this.calculateSimpleStartAndEndPosition();
             return;
@@ -1083,31 +1086,32 @@ define(function (require, exports, module) {
         // else
         
         // some errors I could not reproduce to test them
-        if ((this.raw === "'{a}' is not allowed.") // does not seem to be used in the current implementation
-                || (this.raw === "'{a}' is not defined.") // does not seem to be used in the current implementation
-                || (this.raw === "'{a}' used out of scope.") // Could not reproduce this error to test it
-                || (this.raw === "Attribute '{a}' not all lower case.") // Could not reproduce this error to test it
-                || (this.raw === "Bad constructor.") // Could not reproduce this error to test it
-                || (this.raw === "Bad name: '{a}'.") // Could not reproduce this error to test it
-                || (this.raw === "Bad number '{a}'.") // Could not reproduce this error to test it
-                || (this.raw === "Bad operand.") // Could not reproduce this error to test it
-                || (this.raw === "Unexpected control character '{a}'.") // Not sure what that means
-                || (this.raw === "Dangerous comment.") // Not sure what that means
-                || (this.raw === "Expected '{a}'.") // Could not reproduce (only got stuff like "Expected '{a}' and instead saw '{b}'."
-                || (this.raw === "Expected an identifier in an assignment and instead saw a function invocation.") // Could not reproduce
-                || (this.raw === "Missing option value.") // does not seem to be used in the current implementation
-                || (this.raw === "Missing url.") // Could not reproduce
-                || (this.raw === "Nested not.") // Could not reproduce
-                || (this.raw === "'{a}' has not been fully defined yet.") // Could not reproduce
-                || (this.raw === "'{a}' is not a function.") // Could not reproduce
-                || (this.raw === "'{a}' is out of scope.") // Could not reproduce
-                || (this.raw === "'{a}' should not be greater than '{b}'.") // Could not reproduce
-                || (this.raw === "Redefinition of '{a}'.") // does not seem to be used in the current implementation
-                || (this.raw === "Unexpected character '{a}' in {b}.") // Could not reproduce
-                || (this.raw === "Unsafe character.") // Could not reproduce
-                || (this.raw === "JavaScript URL.") // Could not reproduce
-                || (this.raw === "Use the charAt method.") // does not seem to be used in the current implementation
-                || (this.raw === "Weird program.") // Could not reproduce
+        if ((this.message_id === "a_not_allowed") // "'{a}' is not allowed." // does not seem to be used in the current implementation
+                || (this.message_id === "a_not_defined") // "'{a}' is not defined." // does not seem to be used in the current implementation
+                || (this.message_id === "a_scope") // "'{a}' used out of scope." // Could not reproduce this error to test it
+                || (this.message_id === "attribute_case_a") // "Attribute '{a}' not all lower case." // Could not reproduce this error to test it
+                || (this.message_id === "bad_constructor") // "Bad constructor." // Could not reproduce this error to test it
+                || (this.message_id === "bad_name_a") // "Bad name: '{a}'." // Could not reproduce this error to test it
+                || (this.message_id === "bad_number") // "Bad number '{a}'." // Could not reproduce this error to test it
+                || (this.message_id === "bad_operand") // "Bad operand." // Could not reproduce this error to test it
+                || (this.message_id === "confusing_regexp") // "Confusing regular expression." // Could not reproduce this error to test it
+                || (this.message_id === "control_a") // "Unexpected control character '{a}'." // Not sure what that means
+                || (this.message_id === "dangerous_comment") // "Dangerous comment." // Not sure what that means
+                || (this.message_id === "expected_a") // "Expected '{a}'." // Could not reproduce (only got stuff like "Expected '{a}' and instead saw '{b}'.")
+                || (this.message_id === "identifier_function") // "Expected an identifier in an assignment and instead saw a function invocation." // Could not reproduce
+                || (this.message_id === "missing_option") // "Missing option value." // does not seem to be used in the current implementation
+                || (this.message_id === "missing_url") // "Missing url." // Could not reproduce
+                || (this.message_id === "not") // "Nested not." // Could not reproduce
+                || (this.message_id === "not_a_defined") // "'{a}' has not been fully defined yet." // Could not reproduce
+                || (this.message_id === "not_a_function") // "'{a}' is not a function." // Could not reproduce
+                || (this.message_id === "not_a_scope") // "'{a}' is out of scope." // Could not reproduce
+                || (this.message_id === "not_greater") // "'{a}' should not be greater than '{b}'." // Could not reproduce
+                || (this.message_id === "redefinition_a") // "Redefinition of '{a}'." // does not seem to be used in the current implementation
+                || (this.message_id === "unexpected_char_a_b") // "Unexpected character '{a}' in {b}." // Could not reproduce
+                || (this.message_id === "unsafe") // "Unsafe character." // Could not reproduce
+                || (this.message_id === "url") // "JavaScript URL." // Could not reproduce
+                || (this.message_id === "use_charAt") // "Use the charAt method." // does not seem to be used in the current implementation
+                || (this.message_id === "weird_program") // "Weird program." // Could not reproduce
                 ) {
             this.calculateSimpleStartAndEndPosition();
             return;
@@ -1119,26 +1123,26 @@ define(function (require, exports, module) {
         this.calculateSimpleStartAndEndPosition();
         
         // other errors that are not specifically handled
-        //  Bad hex color '{a}'.
-        //  Bad entity.
-        //  Bad HTML string.
-        //  Bad id: '{a}'.
-        //  A css file should begin with @charset 'UTF-8';
-        //  Empty class.
-        //  This is an ES5 feature.
-        //  HTML confusion in regular expression '<{a}'.
-        //  Avoid HTML event handlers.
-        //  lang is deprecated.
-        //  Unexpected parameter '{a}' in get {b} function.
-        //  Expected parameter (value) in set {a} function.
-        //  {a} ({b}% scanned).
-        //  Stopping.                       // Does not seem to appear by itself, only in combination with {a} ({b}% scanned).
-        //  A '<{a}>' must be within '<{b}>'.
-        //  Too many errors.                // Does not seem to appear by itself, only in combination with {a} ({b}% scanned).
-        //  type is unnecessary.
-        //  Unexpected comment.
-        //  Unrecognized style attribute '{a}'.
-        //  Unrecognized tag '<{a}>'.
+        //  bad_color_a: Bad hex color '{a}'.
+        //  bad_entity: Bad entity.
+        //  bad_html: Bad HTML string.
+        //  bad_id_a: Bad id: '{a}'.
+        //  css: A css file should begin with @charset 'UTF-8';
+        //  empty_class: Empty class.
+        //  es5: This is an ES5 feature.
+        //  html_confusion_a: HTML confusion in regular expression '<{a}'.
+        //  html_handlers: Avoid HTML event handlers.
+        //  lang: lang is deprecated.
+        //  parameter_a_get_b: Unexpected parameter '{a}' in get {b} function. // ES5 stuff
+        //  parameter_set_a: Expected parameter (value) in set {a} function.
+        //  scanned_a_b: {a} ({b}% scanned).
+        //  stopping: Stopping.                       // Does not seem to appear by itself, only in combination with {a} ({b}% scanned).
+        //  tag_a_in_b: A '<{a}>' must be within '<{b}>'.
+        //  too_many: Too many errors.                // Does not seem to appear by itself, only in combination with {a} ({b}% scanned).
+        //  type: type is unnecessary.
+        //  unexpected_comment: Unexpected comment.
+        //  unrecognized_style_attribute_a: Unrecognized style attribute '{a}'.
+        //  unrecognized_tag_a: Unrecognized tag '<{a}>'.
         
         console.log(this);
     };
