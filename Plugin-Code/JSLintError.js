@@ -33,11 +33,19 @@ define(function (require, exports, module) {
     
     JSLintError.prototype.classifyError = function () {
         // First some special cases
-        if ((this.message_id === "expected_a_b") && (this.a === ";")) {
-            // a missing semicolon is not always a syntax error, depending on the browser
-            // but it should be fixed anyway.
-            this.severityLevel = JSLintError.SeverityLevelEnum.SYNTAX_ERROR;
-            return;
+        if (this.message_id === "expected_a_b") {
+            if (this.a === ";") {
+                // a missing semicolon is not always a syntax error, depending on the browser
+                // but it should be fixed anyway.
+                this.severityLevel = JSLintError.SeverityLevelEnum.SYNTAX_ERROR;
+                return;
+            }// else 
+            if ((this.a === "==") || (this.a === "!=")) {
+                // that's not a syntax error, but usually bad style, should use === / !== instead
+                this.severityLevel = JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE;
+                return;
+            }
+            // else use the default for this kind of error
         }
         
         if ((this.message_id === "unexpected_a") && (this.a === "(space)")) {
