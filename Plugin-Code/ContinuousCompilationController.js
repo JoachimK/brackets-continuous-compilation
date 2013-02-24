@@ -14,12 +14,25 @@ define(function (require, exports, module) {
         lastStoppedAtLineHandle = null,
         errorMessagesInLines = [];
     
+    var severityLevelsToDisplay = [JSLintError.SeverityLevelEnum.SYNTAX_ERROR,
+                                    JSLintError.SeverityLevelEnum.UNCLASSIFIED,
+                                    JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE,
+                                    JSLintError.SeverityLevelEnum.WARNING,
+                                    JSLintError.SeverityLevelEnum.JUST_STYLE];
+    
+    var cssClassesForSeverityLevel = {};
+    cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.UNCLASSIFIED] = "cc-JSLint-unclassified-error";
+    cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] = "cc-JSLint-syntax-error";
+    cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE] = "cc-JSLint-bad-code-error";
+    cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.WARNING] = "cc-JSLint-warning";
+    cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.JUST_STYLE] = "cc-JSLint-just-style-warning";
+    
     
     
     function _toggleErrorMessageInLine(codeMirror, lineIndex, gutter) {
-        var errorsOnThisLine = linesWithErrorsAndWarnings[lineIndex];
+        var errorsAndWarningsOnThisLine = linesWithErrorsAndWarnings[lineIndex];
         
-        if (errorsOnThisLine === undefined) {
+        if (errorsAndWarningsOnThisLine === undefined) {
             // no errors to display
             return;
         }
@@ -34,19 +47,29 @@ define(function (require, exports, module) {
             
             // create a div that contains all error messages
             var $errorMessageInEditor = $("<div class='cc-JSLint-error-message'/>");
-            errorsOnThisLine.forEach(function (errorItem, index, array) {
-                var message = errorItem.reason;
-                message = message.replace(/'(.*)'/g, "<span class='cc-code'>$&</span>");
-                var $errorMessageDiv = $("<div><span>" + message + "</span></div>");
-                $errorMessageInEditor.append($errorMessageDiv);
-                
-                // move the error message to the right to position their left border under the error
-                var offsetPosition = errorItem.insertionMarkerPosition || errorItem.startPosition;
-                var offset = codeMirror.cursorCoords(offsetPosition, "local").left;
-                var $offsetSpan = $("<span class='cc-offset'>&nbsp;</span>");
-                $offsetSpan.css("width", offset);
-                
-                $errorMessageDiv.prepend($offsetSpan);
+            severityLevelsToDisplay.forEach(function (severityLevel) {
+                var errorsOnThisSeverityLevelOnThisLine = errorsAndWarningsOnThisLine[severityLevel];
+                if (!errorsOnThisSeverityLevelOnThisLine) {
+                    // no errors on this level
+                    return;
+                }
+                errorsOnThisSeverityLevelOnThisLine.forEach(function (errorItem, index, array) {
+                    var message = errorItem.reason;
+                    message = message.replace(/'(.*)'/g, "<span class='cc-code'>$&</span>");
+                    var $messageSpan = $("<span>" + message + "</span>");
+                    $messageSpan.addClass(cssClassesForSeverityLevel[severityLevel]);
+                    var $errorMessageDiv = $("<div></div>");
+                    $errorMessageDiv.append($messageSpan);
+                    $errorMessageInEditor.append($errorMessageDiv);
+                    
+                    // move the error message to the right to position their left border under the error
+                    var offsetPosition = errorItem.insertionMarkerPosition || errorItem.startPosition;
+                    var offset = codeMirror.cursorCoords(offsetPosition, "local").left;
+                    var $offsetSpan = $("<span class='cc-offset'>&nbsp;</span>");
+                    $offsetSpan.css("width", offset);
+                    
+                    $errorMessageDiv.prepend($offsetSpan);
+                });
             });
             
             
@@ -74,12 +97,6 @@ define(function (require, exports, module) {
         var codeMirror = documentToWatch._masterEditor._codeMirror;
         if (jslintError.type === JSLintError.TypesEnum.STOPPING) {
             // this is the stopping error
-            // add marker class for stopping error to line-number gutter in editor
-            var $lineNumberBox = $(codeMirror.lineInfo(jslintError.startPosition.line).gutterMarkers["CodeMirror-linenumbers"]);
-            var $errorMarkerInLineGutter = $lineNumberBox.find("span");
-            $errorMarkerInLineGutter.addClass("cc-JSLint-stopping-error");
-            $lineNumberBox.attr("title", "Stopping. " + $lineNumberBox.attr("title"));
-            
             // mark the line after which JSLint stopped
             codeMirror.addLineClass(jslintError.startPosition.line, "wrap", "cc-JSLint-stop-line");
             // and add a marker at the point where it stopped in the line itself
@@ -142,29 +159,80 @@ define(function (require, exports, module) {
         // add error markers for current errors
         if ((linesWithErrorsAndWarnings !== undefined) && (linesWithErrorsAndWarnings !== null)) {
             var codeMirror = documentToWatch._masterEditor._codeMirror;
-            linesWithErrorsAndWarnings.forEach(function (errorsOnThisLine, lineIndex, array) {
+            linesWithErrorsAndWarnings.forEach(function (errorsAndWarningsOnThisLine, lineIndex, array) {
                 var $lineNumberBoxForError = $("<div class='cc-JSLint-error-in-line CodeMirror-linenumber'/>");
-                var $errorMarkerInLineGutter = $("<span/>");
-                $lineNumberBoxForError.append($errorMarkerInLineGutter);
-                $lineNumberBoxForError.append(lineIndex + 1);
-                var firstErrorOnThisLine = errorsOnThisLine[0];
-                if (errorsOnThisLine.length === 1) {
-                    // add marker classes to line-number gutter in editor
-                    $errorMarkerInLineGutter.addClass("cc-JSLint-one-error");
-                    $lineNumberBoxForError.attr("title", firstErrorOnThisLine.reason);
-                    $errorMarkerInLineGutter.text("!");
-                    //$lineNumberBoxForError.prepend("<span class='cc-JSLint-error-marker'>!</span>");
-                } else if (errorsOnThisLine.length > 1) {
-                    $errorMarkerInLineGutter.addClass("cc-JSLint-several-errors");
-                    $lineNumberBoxForError.attr("title", errorsOnThisLine.length + " errors. First: " + firstErrorOnThisLine.reason);
-                    $errorMarkerInLineGutter.text(errorsOnThisLine.length);
-                    //$lineNumberBoxForError.prepend("<span class='cc-JSLint-error-marker'>" + errorsOnThisLine.length + "</span>");
+                var containsStoppingError = false;
+                var severityLevelsWithErrors = [];
+                var firstErrors = {};
+                firstErrors[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] = undefined;
+                firstErrors[JSLintError.SeverityLevelEnum.UNCLASSIFIED] = undefined;
+                firstErrors[JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE] = undefined;
+                firstErrors[JSLintError.SeverityLevelEnum.WARNING] = undefined;
+                firstErrors[JSLintError.SeverityLevelEnum.JUST_STYLE] = undefined;
+                
+                severityLevelsToDisplay.forEach(
+                    function (severityLevel) {
+                        var errorsForThisLevelOnThisLine = errorsAndWarningsOnThisLine[severityLevel];
+                        if (!errorsForThisLevelOnThisLine) {
+                            // no errors on this level
+                            return;
+                        }
+                        
+                        var $errorMarkerInLineGutter = $("<span/>");
+                        $errorMarkerInLineGutter.addClass(cssClassesForSeverityLevel[severityLevel]);
+                        $lineNumberBoxForError.append($errorMarkerInLineGutter);
+                        
+                        var firstErrorOnThisLine = errorsForThisLevelOnThisLine[0];
+                        firstErrors[severityLevel] = firstErrorOnThisLine;
+                        
+                        if (errorsForThisLevelOnThisLine.length === 1) {
+                            severityLevelsWithErrors.push(severityLevel);
+                            
+                            // add marker classes to line-number gutter in editor
+                            $errorMarkerInLineGutter.addClass("cc-JSLint-one-error");
+                            $lineNumberBoxForError.attr("title", firstErrorOnThisLine.reason);
+                            $errorMarkerInLineGutter.text("!");
+                            //$lineNumberBoxForError.prepend("<span class='cc-JSLint-error-marker'>!</span>");
+                        } else if (errorsForThisLevelOnThisLine.length > 1) {
+                            severityLevelsWithErrors.push(severityLevel);
+                            
+                            $errorMarkerInLineGutter.addClass("cc-JSLint-several-errors");
+                            $lineNumberBoxForError.attr("title", errorsForThisLevelOnThisLine.length + " errors. First: " + firstErrorOnThisLine.reason);
+                            $errorMarkerInLineGutter.text(errorsForThisLevelOnThisLine.length);
+                            //$lineNumberBoxForError.prepend("<span class='cc-JSLint-error-marker'>" + errorsOnThisLine.length + "</span>");
+                        }
+                        
+                        
+                        
+                        errorsForThisLevelOnThisLine.forEach(function (errorItem, index, array) {
+                            if (errorItem.type === JSLintError.TypesEnum.STOPPING) {
+                                // add marker class for stopping error to line-number gutter in editor
+                                $errorMarkerInLineGutter.addClass("cc-JSLint-stopping-error");
+                                containsStoppingError = true;
+                            }
+                            _addHighlightMarkerForErrorInEditor(errorItem);
+                        });
+                    }
+                );
+                
+                if (severityLevelsWithErrors.length > 1) {
+                    var tooltip = "";
+                    tooltip += firstErrors[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] ? "Syntax Errors: " + errorsAndWarningsOnThisLine[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] + ", " : "";
+                    tooltip += firstErrors[JSLintError.SeverityLevelEnum.UNCLASSIFIED] ? "Unclassified Errors: " + errorsAndWarningsOnThisLine[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] + ", " : "";
+                    tooltip += firstErrors[JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE] ? "Probable Errors: " + errorsAndWarningsOnThisLine[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] + ", " : "";
+                    tooltip += firstErrors[JSLintError.SeverityLevelEnum.WARNING] ? "Warnings: " + errorsAndWarningsOnThisLine[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] + ", " : "";
+                    tooltip += firstErrors[JSLintError.SeverityLevelEnum.JUST_STYLE] ? "Style Warnings: " + errorsAndWarningsOnThisLine[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] : "";
+                    var firstError = firstErrors[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] || firstErrors[JSLintError.SeverityLevelEnum.UNCLASSIFIED] || firstErrors[JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE] || firstErrors[JSLintError.SeverityLevelEnum.WARNING];
+                    $lineNumberBoxForError.attr("title", tooltip + ". First: " + firstError.reason);
                 }
+                if (containsStoppingError) {
+                    $lineNumberBoxForError.attr("title", "Stopping. " + $lineNumberBoxForError.attr("title"));
+                }
+                
+                $lineNumberBoxForError.append(lineIndex + 1);
                 codeMirror.setGutterMarker(lineIndex, "CodeMirror-linenumbers", $lineNumberBoxForError[0]);
                 
-                errorsOnThisLine.forEach(function (errorItem, index, array) {
-                    _addHighlightMarkerForErrorInEditor(errorItem);
-                });
+
             });
         }
     }
@@ -201,7 +269,10 @@ define(function (require, exports, module) {
                     if (linesWithErrorsAndWarnings[error.startPosition.line] === undefined) {
                         linesWithErrorsAndWarnings[error.startPosition.line] = [];
                     }
-                    linesWithErrorsAndWarnings[error.startPosition.line].push(error);
+                    if (linesWithErrorsAndWarnings[error.startPosition.line][error.severityLevel] === undefined) {
+                        linesWithErrorsAndWarnings[error.startPosition.line][error.severityLevel] = [];
+                    }
+                    linesWithErrorsAndWarnings[error.startPosition.line][error.severityLevel].push(error);
                 });
             }
         }
