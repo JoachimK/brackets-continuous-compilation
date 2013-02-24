@@ -58,10 +58,31 @@
             border-top-left-radius: 0em;
         }
         
+        .cc-JSLint-unclassified-error {
+            background-color: rgb(254, 127, 127);
+        }
+        
+        .cc-JSLint-syntax-error {
+            background-color: rgb(216, 3, 3);
+        }
+        
+        .cc-JSLint-bad-code-error {
+            background-color: rgb(251, 148, 26);
+        }
+        
+        .cc-JSLint-warning {
+            background-color: rgb(224, 224, 2);
+        }
+        
+        .cc-JSLint-just-style-warning {
+            background-color: rgb(218, 218, 158);
+        }
+        
         span.cc-code {
             font-family: 'SourceCodePro', "ＭＳ ゴシック", "MS Gothic", monospace;
             padding-left: 0em;
             padding-right: 0em;
+            background-color: transparent;
         }
         
         span.cc-offset {
@@ -106,6 +127,26 @@
         border-bottom-color: red;
     }
     
+    .cc-JSLint-unclassified-error {
+        border-color: rgb(254, 127, 127);
+    }
+    
+    .cc-JSLint-syntax-error {
+        border-color: rgb(216, 3, 3);
+    }
+    
+    .cc-JSLint-bad-code-error {
+        border-color: rgb(251, 148, 26);
+    }
+    
+    .cc-JSLint-warning {
+        border-color: rgb(224, 224, 2);
+    }
+    
+    .cc-JSLint-just-style-warning {
+        border-color: rgb(218, 218, 158);
+    }
+    
     .cc-JSLint-error-missing-left {
         border-left-style: dashed;
         border-left-width: 1pt;
@@ -125,5 +166,5 @@
 
 // make the CodeMirror-gutter wider to accomodate the error marker
 .cm-s-default div.CodeMirror-gutter {
-    min-width: 4.0em;
+    min-width: 5.0em;
 }
