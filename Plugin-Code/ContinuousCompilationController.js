@@ -87,11 +87,11 @@ define(function (require, exports, module) {
     
     function _addHighlightMarkerForErrorInEditor(jslintError) {
         var newErrorHighlight;
-        var markOptionsForNormalErrorHighlight  = {className: "cc-JSLint-error-highlight"},
+        var markOptionsForNormalErrorHighlight  = {className: "cc-JSLint-error-highlight " + cssClassesForSeverityLevel[jslintError.severityLevel]},
             markOptionsForStoppedMarkerRight    = {className: "cc-JSLint-error-stopped-right"},
             markOptionsForStoppedMarkerLeft     = {className: "cc-JSLint-error-stopped-left"},
-            markOptionsForInsertionMarkerRight  = {className: "cc-JSLint-error-missing-right"},
-            markOptionsForInsertionMarkerLeft   = {className: "cc-JSLint-error-missing-left"};
+            markOptionsForInsertionMarkerRight  = {className: "cc-JSLint-error-missing-right " + cssClassesForSeverityLevel[jslintError.severityLevel]},
+            markOptionsForInsertionMarkerLeft   = {className: "cc-JSLint-error-missing-left " + cssClassesForSeverityLevel[jslintError.severityLevel]};
         
         
         var codeMirror = documentToWatch._masterEditor._codeMirror;
