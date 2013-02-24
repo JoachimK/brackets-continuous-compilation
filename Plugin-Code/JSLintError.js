@@ -102,7 +102,7 @@ define(function (require, exports, module) {
         case "weird_new": // likely something wrong
         case "wrap_immediate": // otherwise it looks as if a function is assigned, which is not the case and makes understanding the code a lot harder
         case "write_is_wrong": // document.write can be a form of eval
-            this.severityLevel = JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRATICE;
+            this.severityLevel = JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE;
             break;
                 
         // WARNING
