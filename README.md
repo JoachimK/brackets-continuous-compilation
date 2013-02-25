@@ -19,6 +19,7 @@ This is an extension for [Adobe Brackets][1] to improve on the built-in JSLint-c
 	* bad code or practice: orange. Likely a coding error, possibly just really bad pratice. Often compiles but would likely crash when run or do something unexpected. Should most probably be fixed.
 	* warning: Will usually compile and run, but could indicate an error, e.g. redeclaring a variable or not using a declared variable (this one is not implemented yet).
 	* just style: Things that do no influence the semantics and are just due to personal style, e.g. how many spaces you have between operator and operands etc.
+	* (I'm open to discussions regarding the assignment of errors to severity levels)
 * It uses a newer version of JSLint that reports some more errors and had some bugs fixed.
 
 
