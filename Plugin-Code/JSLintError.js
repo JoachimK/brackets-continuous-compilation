@@ -4,6 +4,16 @@
 define(function (require, exports, module) {
     "use strict";
     
+    var whitespaceRegex                                                     = /\s+/g,
+        whitespaceWithOptionalCommentsRegex                                 = /\s*(\/\/.*)?/, // this matches a line with leading whitespace and then a single line (//) comment. I would have liked to use [:print:] instead of "." , but that's not available.
+        underscoreRegex                                                     = /_+/g,
+        regexForLineWithOnlyClosingBlockBracketPossiblyFollowedByAComment   = /\s*\}\s*(\/\/.*|\/\*.*)?/, // a closing }, possibly with leading and trailing whitespace and/or trailing comments. I would have liked to use [:print:] instead of ".", but that's not available
+        whitespaceWithTwoOptionalOtherCharactersRegex                       = /\s*\S?\S?/,
+        whitespaceWithOptionalCommentFollowedByAClosingBracketRegex         = /\s*(\/\*.*\*\/)?\s*\}/g,
+        regexForCaseAndArgument                                             = /case.*:/, // a "case" followed by something, ending with a ":". Using "." because [:print:] is not available
+        copmpleteLoopBodyOnThisLineRegex                                    = /(for\s*\(.+\s+in\s+.+\)\s*\{)([^}]+)\}/,
+        optionalWhitespaceWithOptionalCommentsRegex                         = /\s*(\/[*\/].*)?/; // optional whitespace, optionally followed by ("//" or "/*") and anything 
+
     function _regExpEscape(str) {
         var specials = new RegExp("[.*+?|()\\[\\]{}\\\\]", "g"); // .*+?|()[]{}\
         return str.replace(specials, "\\$&");
@@ -285,19 +295,9 @@ define(function (require, exports, module) {
             match,
             previousMatch,
             
-            newErrorHighlight,
+            originalStartingPosition                                            = {line: this.startPosition.line, ch: this.startPosition.ch},
         
-            whitespaceRegex                     = /\s+/g,
-            whitespaceWithOptionalCommentsRegex = /\s*(\/\/.*)?/, // this matches a line with leading whitespace and then a single line (//) comment. I would have liked to use [:print:] instead of "." , but that's not available.
-            originalStartingPosition            = {line: this.startPosition.line, ch: this.startPosition.ch},
             findSpacesBetweenStringsRegex,  // has to be created anew each time depending on the strings to find
-            underscoreRegex                     = /_+/g,
-            regexForLineWithOnlyClosingBlockBracketPossiblyFollowedByAComment   = /\s*\}\s*(\/\/.*|\/\*.*)?/, // a closing }, possibly with leading and trailing whitespace and/or trailing comments. I would have liked to use [:print:] instead of ".", but that's not available
-            whitespaceWithTwoOptionalOtherCharactersRegex                       = /\s*\S?\S?/,
-            whitespaceWithOptionalCommentFollowedByAClosingBracketRegex         = /\s*(\/\*.*\*\/)?\s*\}/g,
-            regexForCaseAndArgument                                             = /case.*:/, // a "case" followed by something, ending with a ":". Using "." because [:print:] is not available
-            copmpleteLoopBodyOnThisLineRegex                                    = /(for\s*\(.+\s+in\s+.+\)\s*\{)([^}]+)\}/,
-            optionalWhitespaceWithOptionalCommentsRegex                         = /\s*(\/[*\/].*)?/, // optional whitespace, optionally followed by ("//" or "/*") and anything 
             undefinedInitializationRegex; // has to be created anew each time depending on the strings to find
         
         if (this.raw === undefined) {
