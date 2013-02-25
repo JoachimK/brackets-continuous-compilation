@@ -432,7 +432,9 @@ define(function (require, exports, module) {
             } else {
                 // This means, we are in the case where we actually have too many spaces.
                 // so we have to find the superfluous spaces and underline them.
-                findSpacesBetweenStringsRegex = new RegExp("(" + _regExpEscape(stringA) + ")(\\s+)(" + _regExpEscape(stringB) + ")", "g");
+                // about the regex: if this.a or this.b are strings, e.g. "hello world", the property will contain the string without quotation marks, i.e. this.a === "hello world" instead of ""hello world""
+                // This requires a more lenient regex, that allows quotation marks around stringA and stringB
+                findSpacesBetweenStringsRegex = new RegExp("(" + _regExpEscape(stringA) + "\"?'?)(\\s+)(\"?'?" + _regExpEscape(stringB) + ")", "g");
                 match = findSpacesBetweenStringsRegex.exec(stringToTest);
                 while ((match !== null) && (this.startPosition.ch > match.index + match[0].length)) {
                     previousMatch = match;
@@ -446,7 +448,7 @@ define(function (require, exports, module) {
                     if (this.message_id === "expected_space_a_b") {
                         numberOfSpacesToKeep = 1;
                     }
-                    this.startPosition.ch = match.index + stringA.length + numberOfSpacesToKeep; // + this.a.length is the part before the spaces, then we add the number of spaces to keep.
+                    this.startPosition.ch = match.index + match[1].length + numberOfSpacesToKeep; // + match[1] is the part before the spaces, then we add the number of spaces to keep.
                     this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + (match[2].length - numberOfSpacesToKeep)}; // match[2] should contain the spaces, if we want to keep some of those we substract the correct number
                 } else {
                     this.calculateSimpleStartAndEndPosition();
