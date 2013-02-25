@@ -39,7 +39,8 @@ If you have any questions or feature requests or found bugs [contact me][2] or [
 
 How to install the extension
 -----------------------------
-Just put the folder ./Plugin-Code in Brackets' extension folder (you can find it via the Brackets menu "Help" -> "Show Extensions Folder"). In there put the Plugin-Code folder in the "user" folder of the extensions folder. You may also put it in a folder called "dev" if you like.
+Just put the folder complete folder of this repository in Brackets' extension folder (you can find it via the Brackets menu "Help" -> "Show Extensions Folder"). In there put it in the "user" folder of the extensions folder. You may also put it in a folder called "dev" if you like.
+You do not need to move any of the non-Javascript files there. But it's easier just to copy the whole thing.
 
 You can open the code in the ".example code" folder to see a variety of errors reported by this extension. Or just start writing your own code or open your own project to see it display errors and warnings. ;-)
 
