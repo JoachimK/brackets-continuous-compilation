@@ -123,25 +123,33 @@ define(function (require, exports, module) {
     }
     
     function _clearErrorDisplay() {
+        var codeMirror;
+        
         if (lastStoppedAtLineHandle) {
             lastStoppedAtLineHandle.bgClassName = null;
             lastStoppedAtLineHandle = null;
         }
         
-        documentToWatch._ensureMasterEditor();
-        var codeMirror = documentToWatch._masterEditor._codeMirror;
+        if (documentToWatch) {
+            documentToWatch._ensureMasterEditor();
+            codeMirror = documentToWatch._masterEditor._codeMirror;
+        }
         
         // remove displayed error messages
         errorMessagesInLines.forEach(function (lineWidget, lineIndex, array) {
             if (lineWidget) {
                 lineWidget.clear();
             }
-            codeMirror.removeLineClass(lineIndex, "wrap", "highlightErrorLine");
+            if (codeMirror) {
+                codeMirror.removeLineClass(lineIndex, "wrap", "highlightErrorLine");
+            }
         });
         errorMessagesInLines = [];
         
         // clear error markers in line gutter
-        codeMirror.clearGutter("CodeMirror-linenumbers");
+        if (codeMirror) {
+            codeMirror.clearGutter("CodeMirror-linenumbers");
+        }
         
         // remove error highlights
         errorHighlights.forEach(function (anErrorHighlight, index, array) {
