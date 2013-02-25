@@ -40,7 +40,7 @@ define(function (require, exports, module) {
                 this.severityLevel = JSLintError.SeverityLevelEnum.SYNTAX_ERROR;
                 return;
             }// else 
-            if ((this.a === "==") || (this.a === "!=")) {
+            if ((this.a === "===") || (this.a === "!==")) {
                 // that's not a syntax error, but usually bad style, should use === / !== instead
                 this.severityLevel = JSLintError.SeverityLevelEnum.BAD_CODE_OR_PRACTICE;
                 return;
