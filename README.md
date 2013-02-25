@@ -39,6 +39,8 @@ If you have any questions or feature requests or found bugs [contact me][2] or [
 
 How to install the extension
 -----------------------------
+**Make sure that you initialised and updated all the submodules of this repository before trying the extension. The JSLint part is in a submodule and it won't work without that.**
+
 Just put the folder complete folder of this repository in Brackets' extension folder (you can find it via the Brackets menu "Help" -> "Show Extensions Folder"). In there put it in the "user" folder of the extensions folder. You may also put it in a folder called "dev" if you like.
 You do not need to move any of the non-Javascript files there. But it's easier just to copy the whole thing.
 
