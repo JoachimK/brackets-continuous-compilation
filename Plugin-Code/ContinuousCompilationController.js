@@ -283,7 +283,10 @@ define(function (require, exports, module) {
     function setDocumentToWatch(newDocumentToWatch) {
         if ((documentToWatch !== undefined) && (documentToWatch !== null)) {
             $(documentToWatch).off("change.ContinuousCompilationController");
-            $(documentToWatch._masterEditor._codeMirror).off("gutterClick", _toggleErrorMessageInLine);
+            var masterEditor = documentToWatch._masterEditor;
+            if (masterEditor) {
+                $(masterEditor._codeMirror).off("gutterClick", _toggleErrorMessageInLine);
+            }
             documentToWatch.releaseRef();
         }
         
@@ -303,13 +306,18 @@ define(function (require, exports, module) {
         } else {
             documentToWatch.addRef();
             $(documentToWatch).on("change.ContinuousCompilationController", function () {
+                documentToWatch._ensureMasterEditor();
                 documentToWatch._masterEditor._codeMirror.operation(function () {
                     _setCodeToCompile(documentToWatch.getText());
                 });
             });
+            
+            documentToWatch._ensureMasterEditor();
             documentToWatch._masterEditor._codeMirror.on("gutterClick", _toggleErrorMessageInLine);
             
-            _setCodeToCompile(documentToWatch.getText());
+            documentToWatch._masterEditor._codeMirror.operation(function () {
+                _setCodeToCompile(documentToWatch.getText());
+            });
         }
     }
     
