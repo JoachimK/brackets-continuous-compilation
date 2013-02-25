@@ -3,6 +3,7 @@ This version of the extension was tested with Brackets Sprint 20.
 
 Brackets Continuous Compilation Extension
 =========================================
+![A screenshot of Brackets with this extension showing JSlint errors inline in the code.](https://lh6.googleusercontent.com/-Az65Dv9Peqk/UStTba4VWMI/AAAAAAAAAAM/_rzF-UVvf1c/s1600/bad_code_example.png)
 
 This is an extension for [Adobe Brackets][1] to improve on the built-in JSLint-check. The built-in check only runs when the file is saved and only displays a list of error messages at the bottom of the editor. This extension improves on this in the following ways:
 
