@@ -52,6 +52,10 @@ if (c == 1) {
     c = 2;
 }
 
+if (c != 1) {
+    c = 2;
+}
+
 document = true;
 
 var theArray = [70, 30, 5, 2, 10, 5, 11, 12, 80];
