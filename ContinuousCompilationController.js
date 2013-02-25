@@ -128,6 +128,7 @@ define(function (require, exports, module) {
             lastStoppedAtLineHandle = null;
         }
         
+        documentToWatch._ensureMasterEditor();
         var codeMirror = documentToWatch._masterEditor._codeMirror;
         
         // remove displayed error messages
