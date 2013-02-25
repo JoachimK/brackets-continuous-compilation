@@ -11,20 +11,59 @@
     border-radius: 50%;
 }
 
-.cc-JSLint-several-errors {
-    background-color: rgb(182, 43, 63);
+.CodeMirror-gutter-elt {
+    .cc-JSLint-several-errors {
+        background-color: rgb(182, 43, 63);
+    }
+    
+    .cc-JSLint-one-error {
+        background-color: rgb(231, 79, 96);
+    }
 }
 
-.cc-JSLint-one-error {
-    background-color: rgb(231, 79, 96);
+.CodeMirror-gutter-elt, .CodeMirror-linewidget {
+
+    .cc-JSLint-stopping-error {
+        background-color: rgb(115, 40, 48);
+        //padding-right: 4pt;
+        //padding-left: 4pt;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    
+    .cc-JSLint-just-style-warning {
+        background-color: rgb(177, 177, 78);
+    }
+    
+    .cc-JSLint-warning {
+        background-color: rgb(224, 224, 2);
+    }
+    
+    .cc-JSLint-bad-code-error {
+        background-color: rgb(251, 105, 26);
+    }
+    
+    .cc-JSLint-unclassified-error {
+        background-color: rgb(254, 127, 127);
+    }
+    
+    .cc-JSLint-syntax-error {
+        background-color: rgb(216, 3, 3);
+    }
 }
 
-.cc-JSLint-stopping-error {
-    background-color: rgb(115, 40, 48);
-    //padding-right: 4pt;
-    //padding-left: 4pt;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+.CodeMirror-linewidget {
+    .cc-JSLint-bad-code-error {
+        color:  white;
+    }
+    
+    .cc-JSLint-unclassified-error {
+        color:  white;
+    }
+    
+    .cc-JSLint-syntax-error {
+        color:  white;
+    }
 }
 
 .CodeMirror-lines 
@@ -58,31 +97,10 @@
             border-top-left-radius: 0em;
         }
         
-        .cc-JSLint-unclassified-error {
-            background-color: rgb(254, 127, 127);
-        }
-        
-        .cc-JSLint-syntax-error {
-            background-color: rgb(216, 3, 3);
-        }
-        
-        .cc-JSLint-bad-code-error {
-            background-color: rgb(251, 148, 26);
-        }
-        
-        .cc-JSLint-warning {
-            background-color: rgb(224, 224, 2);
-        }
-        
-        .cc-JSLint-just-style-warning {
-            background-color: rgb(218, 218, 158);
-        }
-        
         span.cc-code {
             font-family: 'SourceCodePro', "ＭＳ ゴシック", "MS Gothic", monospace;
             padding-left: 0em;
             padding-right: 0em;
-            background-color: transparent;
         }
         
         span.cc-offset {
@@ -127,6 +145,18 @@
         border-bottom-color: red;
     }
     
+    .cc-JSLint-just-style-warning {
+        border-color: rgb(177, 177, 78);
+    }
+    
+    .cc-JSLint-warning {
+        border-color: rgb(224, 224, 2);
+    }
+    
+    .cc-JSLint-bad-code-error {
+        border-color: rgb(251, 148, 26);
+    }
+    
     .cc-JSLint-unclassified-error {
         border-color: rgb(254, 127, 127);
     }
@@ -135,22 +165,9 @@
         border-color: rgb(216, 3, 3);
     }
     
-    .cc-JSLint-bad-code-error {
-        border-color: rgb(251, 148, 26);
-    }
-    
-    .cc-JSLint-warning {
-        border-color: rgb(224, 224, 2);
-    }
-    
-    .cc-JSLint-just-style-warning {
-        border-color: rgb(218, 218, 158);
-    }
-    
     .cc-JSLint-error-missing-left {
         border-left-style: dashed;
         border-left-width: 1pt;
-        border-left-color: red;
         border-bottom-left-radius: 3pt;
         border-top-left-radius: 3pt;
     }
@@ -158,7 +175,6 @@
     .cc-JSLint-error-missing-right {
         border-right-style: dashed;
         border-right-width: 1pt;
-        border-right-color: red;
         border-bottom-right-radius: 3pt;
         border-top-right-radius: 3pt;
     }
