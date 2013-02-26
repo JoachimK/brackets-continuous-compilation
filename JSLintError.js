@@ -300,6 +300,20 @@ define(function (require, exports, module) {
             findSpacesBetweenStringsRegex,  // has to be created anew each time depending on the strings to find
             undefinedInitializationRegex; // has to be created anew each time depending on the strings to find
         
+        
+        // reset the regexps 
+        whitespaceRegex.lastIndex = 0;
+        whitespaceWithOptionalCommentsRegex.lastIndex = 0;
+        whitespaceWithOptionalCommentFollowedByAClosingBracketRegex.lastIndex = 0;
+        whitespaceWithTwoOptionalOtherCharactersRegex.lastIndex = 0;
+        underscoreRegex.lastIndex = 0;
+        regexForLineWithOnlyClosingBlockBracketPossiblyFollowedByAComment.lastIndex = 0;
+        regexForCaseAndArgument.lastIndex = 0;
+        completeLoopBodyOnThisLineRegex.lastIndex = 0;
+        optionalWhitespaceWithOptionalCommentsRegex.lastIndex = 0;
+        
+        
+        
         if (this.raw === undefined) {
             // this is the stopping error
             // just highlight one character, the one after it stopped
@@ -379,7 +393,6 @@ define(function (require, exports, module) {
             if (this.a === "(space)") {
                 stringToTest = this.evidence.substr(this.startPosition.ch);
                 // find the infringing space
-                whitespaceRegex.lastIndex = 0;
                 match = whitespaceRegex.exec(stringToTest);
                 this.startPosition.ch += match.index;
                 this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + match[0].length};
