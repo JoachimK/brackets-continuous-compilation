@@ -379,6 +379,7 @@ define(function (require, exports, module) {
             if (this.a === "(space)") {
                 stringToTest = this.evidence.substr(this.startPosition.ch);
                 // find the infringing space
+                whitespaceRegex.lastIndex = 0;
                 match = whitespaceRegex.exec(stringToTest);
                 this.startPosition.ch += match.index;
                 this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + match[0].length};
