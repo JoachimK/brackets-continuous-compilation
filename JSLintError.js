@@ -105,6 +105,7 @@ define(function (require, exports, module) {
         case "implied_evil": // eval(), just worse
         case "isNaN": // comparing to NaN will always give false even (NaN == NaN) is false, so this is most likely a programming error
         case "label_a_b": // don't use labels on non-loop statements. What are you trying to do?
+        case "unexpected_label": // don't use labels on non-loop statements. What are you trying to do?
         case "missing_a": // only found "missing new", that's likely an oversight and programming error
         case "missing_a_after_b": // only found "missing break", that's at least bad practice, often an error
         case "not_a_constructor": // Compiles and doesn't crash, but it likely doesn't do what you expect (e.g. ("test" === new String("test")) is false)
@@ -1095,6 +1096,7 @@ define(function (require, exports, module) {
                 || (this.message_id === "weird_ternary") // "Weird ternary."
                 || (this.message_id === "wrap_regexp") // "Wrap the /regexp/ literal in parens to disambiguate the slash operator.")
                 || (this.message_id === "use_param") // Use a named parameter.
+                || (this.message_id === "use_param") // "Unexpected label '{a}'."
                 ) {
             this.calculateSimpleStartAndEndPosition();
             return;
