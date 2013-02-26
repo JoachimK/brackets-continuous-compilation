@@ -11,7 +11,7 @@ define(function (require, exports, module) {
         whitespaceWithTwoOptionalOtherCharactersRegex                       = /\s*\S?\S?/,
         whitespaceWithOptionalCommentFollowedByAClosingBracketRegex         = /\s*(\/\*.*\*\/)?\s*\}/g,
         regexForCaseAndArgument                                             = /case.*:/, // a "case" followed by something, ending with a ":". Using "." because [:print:] is not available
-        copmpleteLoopBodyOnThisLineRegex                                    = /(for\s*\(.+\s+in\s+.+\)\s*\{)([^}]+)\}/,
+        completeLoopBodyOnThisLineRegex                                     = /(for\s*\(.+\s+in\s+.+\)\s*\{)([^}]+)\}/,
         optionalWhitespaceWithOptionalCommentsRegex                         = /\s*(\/[*\/].*)?/; // optional whitespace, optionally followed by ("//" or "/*") and anything 
 
     function _regExpEscape(str) {
@@ -746,7 +746,7 @@ define(function (require, exports, module) {
             // We just test whether this line contains an opening and a closing bracket, if so we assume that's the body and highlight it.
             // otherwise, we just highlight the line with the closing bracket, if it contains anything, or the line after the closing bracket
             stringToTest = this.evidence.substr(this.startPosition.ch);
-            match = copmpleteLoopBodyOnThisLineRegex.exec(stringToTest);
+            match = completeLoopBodyOnThisLineRegex.exec(stringToTest);
             if (match !== null) {
                 // it's on the same line
                 // highlight the stuff between the {}
