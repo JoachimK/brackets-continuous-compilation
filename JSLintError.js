@@ -159,6 +159,7 @@ define(function (require, exports, module) {
         case "trailing_decimal_a":
         case "missing_space_a_b":
         case "mixed":
+        case "use_spaces":
         case "move_invocation":
         case "slash_equal": // works fine, confusing it with something like a/= 2; might be an issues, but with syntax highlighting that's usually not a problem.
         case "subscript":
