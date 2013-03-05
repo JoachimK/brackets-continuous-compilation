@@ -302,8 +302,7 @@ define(function (require, exports, module) {
         if (newDocumentToWatch === null) {
             documentToWatch = null;
         } else {
-            var theExtension = PathUtils.filenameExtension(newDocumentToWatch.file.fullPath);
-            if (theExtension !== ".js") {
+            if (newDocumentToWatch.getLanguage()._name !== "JavaScript") {
                 documentToWatch = null;
             } else {
                 documentToWatch = newDocumentToWatch;
