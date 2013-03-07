@@ -1,6 +1,17 @@
 var x;
 var y;
 
+// Use spaces, not tabs
+if (x < y) {
+	x = 1;
+    if (y < x) {
+    	y = 2;
+        if (x === y) {
+    		      x = y;
+        }
+    }
+}
+
 // missing space
 x = x+ y;
 x = x +y;

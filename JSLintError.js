@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     "use strict";
     
     var whitespaceRegex                                                     = /\s+/g,
+        tabsRegex                                                           = /\t+/g,
         whitespaceWithOptionalCommentsRegex                                 = /\s*(\/\/.*)?/, // this matches a line with leading whitespace and then a single line (//) comment. I would have liked to use [:print:] instead of "." , but that's not available.
         underscoreRegex                                                     = /_+/g,
         regexForLineWithOnlyClosingBlockBracketPossiblyFollowedByAComment   = /\s*\}\s*(\/\/.*|\/\*.*)?/, // a closing }, possibly with leading and trailing whitespace and/or trailing comments. I would have liked to use [:print:] instead of ".", but that's not available
@@ -313,6 +314,7 @@ define(function (require, exports, module) {
         regexForCaseAndArgument.lastIndex = 0;
         completeLoopBodyOnThisLineRegex.lastIndex = 0;
         optionalWhitespaceWithOptionalCommentsRegex.lastIndex = 0;
+        tabsRegex.lastIndex = 0;
         
         
         
@@ -1044,6 +1046,22 @@ define(function (require, exports, module) {
                 // did not find it, just reset and use the default highlight
                 this.startPosition = originalStartingPosition;
                 this.calculateSimpleStartAndEndPosition();
+            }
+            return;
+        }
+        // else
+        
+        if (this.message_id === "use_spaces") {
+            // underline the tabs
+            stringToTest = this.evidence.substr(this.startPosition.ch);
+            match = tabsRegex.exec(stringToTest);
+            if (match !== null) {
+                this.startPosition.ch += match.index;
+                this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + match[0].length};
+            } else {
+                // didn't find tabs
+                // just highlight one character wherever JSLint said it was
+                this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + 1};
             }
             return;
         }
