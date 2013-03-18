@@ -8,6 +8,7 @@ define(function (require, exports, module) {
         tabsRegex                                                           = /\t+/g,
         whitespaceWithOptionalCommentsRegex                                 = /\s*(\/\/.*)?/, // this matches a line with leading whitespace and then a single line (//) comment. I would have liked to use [:print:] instead of "." , but that's not available.
         underscoreRegex                                                     = /_+/g,
+        todoRegex                                                           = /todo/i,
         regexForLineWithOnlyClosingBlockBracketPossiblyFollowedByAComment   = /\s*\}\s*(\/\/.*|\/\*.*)?/, // a closing }, possibly with leading and trailing whitespace and/or trailing comments. I would have liked to use [:print:] instead of ".", but that's not available
         whitespaceWithTwoOptionalOtherCharactersRegex                       = /\s*\S?\S?/,
         whitespaceWithOptionalCommentFollowedByAClosingBracketRegex         = /\s*(\/\*.*\*\/)?\s*\}/g,
@@ -165,6 +166,7 @@ define(function (require, exports, module) {
         case "slash_equal": // works fine, confusing it with something like a/= 2; might be an issues, but with syntax highlighting that's usually not a problem.
         case "subscript":
         case "too_long":
+        case "todo_comment":
         case "unexpected_space_a_b":
         case "unnecessary_use":
         case "use_object": // seems to be a question of style: http://www.jameswiseman.com/blog/2011/01/19/jslint-messages-use-the-object-literal-notation/
@@ -315,6 +317,7 @@ define(function (require, exports, module) {
         completeLoopBodyOnThisLineRegex.lastIndex = 0;
         optionalWhitespaceWithOptionalCommentsRegex.lastIndex = 0;
         tabsRegex.lastIndex = 0;
+        todoRegex.lastIndex = 0;
         
         
         
@@ -1066,6 +1069,20 @@ define(function (require, exports, module) {
             return;
         }
         // else
+        
+        if (this.message_id === "todo_comment") {
+            stringToTest = this.evidence.substr(this.startPosition.ch);
+            match = todoRegex.exec(stringToTest);
+            if (match !== null) {
+                this.startPosition.ch += match.index;
+                this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + match[0].length};
+            } else {
+                // didn't find tabs
+                // just highlight one character wherever JSLint said it was
+                this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + 1};
+            }
+            return;
+        }
         
         // for the following errors I know that the default highlighting works correctly
         if ((this.message_id === "used_before_a") // "'{a}' was used before it was defined."
