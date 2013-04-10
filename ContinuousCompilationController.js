@@ -359,5 +359,4 @@ define(function (require, exports, module) {
     }
     
     exports.setDocumentToWatch = setDocumentToWatch;
-    exports.showCurrentErrors = showCurrentErrors;
 });
