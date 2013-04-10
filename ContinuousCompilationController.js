@@ -1,5 +1,5 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
-/*global define, $, JSLINT, PathUtils */
+/*global define, $, JSLINT, PathUtils, setTimeout, clearTimeout */
 
 define(function (require, exports, module) {
     "use strict";
@@ -288,8 +288,41 @@ define(function (require, exports, module) {
         
         showCurrentErrors();
     }
-    
+
+
+    var timer = null;
+    function _cancelCompilation() {
+        clearTimeout(timer);
+    }
+
+
+    function _runCompilation(documentToWatch) {
+        //
+        // Run this in a timer so that we modify a document without getting
+        // all kinds of noise in the document in the middle of typing, which
+        // can be rather distracting.
+        //
+
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+
+        timer = setTimeout(function () {
+            timer = null;
+
+            documentToWatch._ensureMasterEditor();
+            documentToWatch._masterEditor._codeMirror.operation(function () {
+                _setCodeToCompile(documentToWatch.getText());
+            });
+
+        }, 1000);
+    }
+
+
     function setDocumentToWatch(newDocumentToWatch) {
+        _cancelCompilation();
+
         if ((documentToWatch !== undefined) && (documentToWatch !== null)) {
             $(documentToWatch).off("change.ContinuousCompilationController");
             var masterEditor = documentToWatch._masterEditor;
@@ -314,18 +347,12 @@ define(function (require, exports, module) {
         } else {
             documentToWatch.addRef();
             $(documentToWatch).on("change.ContinuousCompilationController", function () {
-                documentToWatch._ensureMasterEditor();
-                documentToWatch._masterEditor._codeMirror.operation(function () {
-                    _setCodeToCompile(documentToWatch.getText());
-                });
+                _runCompilation(documentToWatch);
             });
-            
+
+            _runCompilation(documentToWatch);
             documentToWatch._ensureMasterEditor();
             documentToWatch._masterEditor._codeMirror.on("gutterClick", _toggleErrorMessageInLine);
-            
-            documentToWatch._masterEditor._codeMirror.operation(function () {
-                _setCodeToCompile(documentToWatch.getText());
-            });
         }
     }
     
