@@ -3,13 +3,13 @@
 
 define(function (require, exports, module) {
     'use strict';
-    var AppInit                         = brackets.getModule("utils/AppInit");
-    var EditorManager                   = brackets.getModule("editor/EditorManager");
-    var DocumentManager                 = brackets.getModule("document/DocumentManager");
-    var Editor                          = brackets.getModule('editor/Editor');
-    var TextRange                       = brackets.getModule('document/TextRange').TextRange;
-    var ExtensionUtils                  = brackets.getModule("utils/ExtensionUtils");
-    var ContinuousCompilationController = require("ContinuousCompilationController");
+    var AppInit         = brackets.getModule("utils/AppInit");
+    var EditorManager   = brackets.getModule("editor/EditorManager");
+    var DocumentManager = brackets.getModule("document/DocumentManager");
+    var Editor          = brackets.getModule('editor/Editor');
+    var TextRange       = brackets.getModule('document/TextRange').TextRange;
+    var ExtensionUtils  = brackets.getModule("utils/ExtensionUtils");
+    var DocumentWatcher = require("DocumentWatcher");
     
     
     
@@ -20,7 +20,7 @@ define(function (require, exports, module) {
     
     // called when the current document changes
     function _setupContinuousCompilationForChangedDocument(theEvent) {
-        ContinuousCompilationController.setDocumentToWatch(DocumentManager.getCurrentDocument());
+        DocumentWatcher.setDocumentToWatch(DocumentManager.getCurrentDocument());
     }
     
     AppInit.appReady(function () {

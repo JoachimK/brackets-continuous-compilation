@@ -7,8 +7,7 @@ define(function (require, exports, module) {
     var JSLintError = require("JSLintError"),
         JSLINT      = require("JSLint/jslint");
     
-    var documentToWatch,
-        codeToCompileLines,
+    var codeMirror,
         linesWithErrorsAndWarnings,
         errorHighlights = [],
         lastStoppedAtLineHandle = null,
@@ -96,45 +95,38 @@ define(function (require, exports, module) {
             markOptionsForInsertionMarkerLeft   = {className: "cc-JSLint-error-missing-left " + cssClassesForSeverityLevel[jslintError.severityLevel]};
         
         
-        var codeMirror = documentToWatch._masterEditor._codeMirror;
         if (jslintError.type === JSLintError.TypesEnum.STOPPING) {
             // this is the stopping error
             // mark the line after which JSLint stopped
             codeMirror.addLineClass(jslintError.startPosition.line, "wrap", "cc-JSLint-stop-line");
             // and add a marker at the point where it stopped in the line itself
-            newErrorHighlight = documentToWatch._masterEditor._codeMirror.markText({line: jslintError.startPosition.line, ch: 0}, jslintError.startPosition, markOptionsForStoppedMarkerRight);
+            newErrorHighlight = codeMirror.markText({line: jslintError.startPosition.line, ch: 0}, jslintError.startPosition, markOptionsForStoppedMarkerRight);
             errorHighlights.push(newErrorHighlight);
-            newErrorHighlight = documentToWatch._masterEditor._codeMirror.markText(jslintError.startPosition, {line: jslintError.startPosition.line, ch: jslintError.startPosition.ch + 1}, markOptionsForStoppedMarkerLeft);
+            newErrorHighlight = codeMirror.markText(jslintError.startPosition, {line: jslintError.startPosition.line, ch: jslintError.startPosition.ch + 1}, markOptionsForStoppedMarkerLeft);
             errorHighlights.push(newErrorHighlight);
             return;
         }
         
         // highlight error
-        newErrorHighlight = documentToWatch._masterEditor._codeMirror.markText(jslintError.startPosition, jslintError.endPosition, markOptionsForNormalErrorHighlight);
+        newErrorHighlight = codeMirror.markText(jslintError.startPosition, jslintError.endPosition, markOptionsForNormalErrorHighlight);
         errorHighlights.push(newErrorHighlight);
         if (jslintError.type === JSLintError.TypesEnum.MISSING) {
             // if it's a highlight for something that's missing. Add classes for the insertion marker.
             // ( the CSS classes are swiched (left assigned to right and vice versa) sine the position indicates the position left (or right) of the insertion point
             //      which means the insertion marker should be displayed on the right (or left) )
             var insertionPos = jslintError.insertionMarkerPosition || jslintError.startPosition;
-            newErrorHighlight = documentToWatch._masterEditor._codeMirror.markText({line: insertionPos.line, ch: insertionPos.ch - 1}, insertionPos, markOptionsForInsertionMarkerRight);
+            newErrorHighlight = codeMirror.markText({line: insertionPos.line, ch: insertionPos.ch - 1}, insertionPos, markOptionsForInsertionMarkerRight);
             errorHighlights.push(newErrorHighlight);
-            newErrorHighlight = documentToWatch._masterEditor._codeMirror.markText(insertionPos, {line: insertionPos.line, ch: insertionPos.ch + 1}, markOptionsForInsertionMarkerLeft);
+            newErrorHighlight = codeMirror.markText(insertionPos, {line: insertionPos.line, ch: insertionPos.ch + 1}, markOptionsForInsertionMarkerLeft);
             errorHighlights.push(newErrorHighlight);
         }
     }
     
     function _clearErrorDisplay() {
-        var codeMirror;
         
         if (lastStoppedAtLineHandle) {
             lastStoppedAtLineHandle.bgClassName = null;
             lastStoppedAtLineHandle = null;
-        }
-        
-        if (documentToWatch) {
-            documentToWatch._ensureMasterEditor();
-            codeMirror = documentToWatch._masterEditor._codeMirror;
         }
         
         // remove displayed error messages
@@ -142,16 +134,13 @@ define(function (require, exports, module) {
             if (lineWidget) {
                 lineWidget.clear();
             }
-            if (codeMirror) {
-                codeMirror.removeLineClass(lineIndex, "wrap", "highlightErrorLine");
-            }
+            
+            codeMirror.removeLineClass(lineIndex, "wrap", "highlightErrorLine");
         });
         errorMessagesInLines = [];
         
         // clear error markers in line gutter
-        if (codeMirror) {
-            codeMirror.clearGutter("CodeMirror-linenumbers");
-        }
+        codeMirror.clearGutter("CodeMirror-linenumbers");
         
         // remove error highlights
         errorHighlights.forEach(function (anErrorHighlight, index, array) {
@@ -160,7 +149,7 @@ define(function (require, exports, module) {
         errorHighlights = [];
     }
     
-    function showCurrentErrors() {
+    function _showCurrentErrors() {
         // reset error markers
         _clearErrorDisplay();
         
@@ -169,7 +158,6 @@ define(function (require, exports, module) {
         
         // add error markers for current errors
         if ((linesWithErrorsAndWarnings !== undefined) && (linesWithErrorsAndWarnings !== null)) {
-            var codeMirror = documentToWatch._masterEditor._codeMirror;
             linesWithErrorsAndWarnings.forEach(function (errorsAndWarningsOnThisLine, lineIndex, array) {
                 var $lineNumberBoxForError = $("<div class='cc-JSLint-error-in-line CodeMirror-linenumber'/>");
                 var containsStoppingError = false;
@@ -248,15 +236,15 @@ define(function (require, exports, module) {
         }
     }
         
-    function _setCodeToCompile(newCodeToCompile) {
+    function compileCodeAndDisplayErrors(newCodeToCompile) {
         if (newCodeToCompile === null) {
-            codeToCompileLines = null;
             linesWithErrorsAndWarnings = null;
         } else {
             // If a line contains only whitespace, remove the whitespace
             // This should be doable with a regexp: text.replace(/\r[\x20|\t]+\r/g, "\r\r");,
             // but that doesn't work.
             var i,
+                codeToCompileLines,
                 linesWithoutCompleteWhitespaceLines = newCodeToCompile.split("\n");
             // JSLint complains about lines that just contain whitespace. We just remove those, because that's really over the top...
             for (i = 0; i < linesWithoutCompleteWhitespaceLines.length; i++) {
@@ -288,75 +276,27 @@ define(function (require, exports, module) {
             }
         }
         
-        showCurrentErrors();
-    }
-
-
-    var timer = null;
-    function _cancelCompilation() {
-        clearTimeout(timer);
-    }
-
-
-    function _runCompilation(documentToWatch) {
-        //
-        // Run this in a timer so that we modify a document without getting
-        // all kinds of noise in the document in the middle of typing, which
-        // can be rather distracting.
-        //
-
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
-
-        timer = setTimeout(function () {
-            timer = null;
-
-            documentToWatch._ensureMasterEditor();
-            documentToWatch._masterEditor._codeMirror.operation(function () {
-                _setCodeToCompile(documentToWatch.getText());
-            });
-
-        }, DELAY_FOR_THROTTLING_ERROR_CHECKING);
-    }
-
-
-    function setDocumentToWatch(newDocumentToWatch) {
-        _cancelCompilation();
-
-        if ((documentToWatch !== undefined) && (documentToWatch !== null)) {
-            $(documentToWatch).off("change.ContinuousCompilationController");
-            var masterEditor = documentToWatch._masterEditor;
-            if (masterEditor) {
-                $(masterEditor._codeMirror).off("gutterClick", _toggleErrorMessageInLine);
-            }
-            documentToWatch.releaseRef();
-        }
-        
-        if (newDocumentToWatch === null) {
-            documentToWatch = null;
-        } else {
-            if (newDocumentToWatch.getLanguage()._name !== "JavaScript") {
-                documentToWatch = null;
-            } else {
-                documentToWatch = newDocumentToWatch;
-            }
-        }
-        
-        if (documentToWatch === null) {
-            _setCodeToCompile(null);
-        } else {
-            documentToWatch.addRef();
-            $(documentToWatch).on("change.ContinuousCompilationController", function () {
-                _runCompilation(documentToWatch);
-            });
-
-            _runCompilation(documentToWatch);
-            documentToWatch._ensureMasterEditor();
-            documentToWatch._masterEditor._codeMirror.on("gutterClick", _toggleErrorMessageInLine);
+        if (codeMirror) {
+            _showCurrentErrors();
         }
     }
+
     
-    exports.setDocumentToWatch = setDocumentToWatch;
+    exports.compileCodeAndDisplayErrors = compileCodeAndDisplayErrors;
+    
+    exports.setCodeMirrorToAddHighlightsTo = function (codeMirrorToUse) {
+        if (codeMirror) {
+            // cleanup before letting go of old CodeMirror
+            codeMirror.off("gutterClick", _toggleErrorMessageInLine);
+            _clearErrorDisplay();
+        }
+        
+        codeMirror = codeMirrorToUse;
+        
+        if (codeMirror) {
+            codeMirror.on("gutterClick", _toggleErrorMessageInLine);
+            _showCurrentErrors();
+        }
+    };
+    
 });
