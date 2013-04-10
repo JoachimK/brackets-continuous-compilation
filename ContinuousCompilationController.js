@@ -20,6 +20,8 @@ define(function (require, exports, module) {
                                     JSLintError.SeverityLevelEnum.WARNING,
                                     JSLintError.SeverityLevelEnum.JUST_STYLE];
     
+    var DELAY_FOR_THROTTLING_ERROR_CHECKING = 500;
+    
     var cssClassesForSeverityLevel = {};
     cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.UNCLASSIFIED] = "cc-JSLint-unclassified-error";
     cssClassesForSeverityLevel[JSLintError.SeverityLevelEnum.SYNTAX_ERROR] = "cc-JSLint-syntax-error";
@@ -316,7 +318,7 @@ define(function (require, exports, module) {
                 _setCodeToCompile(documentToWatch.getText());
             });
 
-        }, 1000);
+        }, DELAY_FOR_THROTTLING_ERROR_CHECKING);
     }
 
 
