@@ -14,6 +14,11 @@ for (i = 0; i < 10; i += 1) {
     b *= c;
 }
 
+// unexpected_typeof_a: Unexpected 'typeof'. Use '===' to compare directly with {a}
+if (typeof a === "undefined") {
+    
+}
+
 
 function foo(alreadyDefined) {
     "use strict";

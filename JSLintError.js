@@ -171,6 +171,7 @@ define(function (require, exports, module) {
         case "unnecessary_use":
         case "use_object": // seems to be a question of style: http://www.jameswiseman.com/blog/2011/01/19/jslint-messages-use-the-object-literal-notation/
         case "use_or": // seems to be a matter of style to me. I think b ? b : defaultValue is easier to understand than b || defaultValue.
+        case "unexpected_typeof_a": // occurs for cases such as (typeof a === "undefined"). The typeof is unecessary. But it should do the same, so just a matter of style.
         case "wrap_regexp":
             this.severityLevel = JSLintError.SeverityLevelEnum.JUST_STYLE;
             break;
@@ -1081,6 +1082,13 @@ define(function (require, exports, module) {
                 // just highlight one character wherever JSLint said it was
                 this.endPosition = {line: this.startPosition.line, ch: this.startPosition.ch + 1};
             }
+            return;
+        }
+        
+        if (this.message_id === "unexpected_typeof_a") {
+            // the character points to the "undefined" string, but what is actually wrong is the "typeof"
+            this.startPosition.ch = 0;
+            this.calculateSimpleStartAndEndPosition("typeof");
             return;
         }
         
